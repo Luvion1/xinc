@@ -104,6 +104,11 @@ impl Analyzer {
                     self.check_expr(arg)?;
                 }
             }
+            Expression::Ternary { cond, then_expr, else_expr } => {
+                self.check_expr(cond)?;
+                self.check_expr(then_expr)?;
+                self.check_expr(else_expr)?;
+            }
         }
         Ok(())
     }

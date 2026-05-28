@@ -15,6 +15,8 @@ pub enum Expression {
     Unary { op: UnaryOp, operand: Box<Expression> },
     /// Function call.
     Call { callee: Box<Expression>, args: Vec<Expression> },
+    /// Ternary conditional: cond ? then : else
+    Ternary { cond: Box<Expression>, then_expr: Box<Expression>, else_expr: Box<Expression> },
 }
 
 /// Literal value.
@@ -26,7 +28,7 @@ pub enum Literal {
     Number(String),
     /// Boolean literal.
     Boolean(bool),
-/// Null literal.
+    /// Null literal.
     #[default]
     Null,
 }
@@ -144,6 +146,16 @@ mod tests {
         for op in ops {
             assert_eq!(op, op);
         }
+    }
+
+    #[test]
+    fn test_ternary_expression() {
+        let expr = Expression::Ternary {
+            cond: Box::new(Expression::Literal(Literal::Boolean(true))),
+            then_expr: Box::new(Expression::Literal(Literal::Number("1".to_string()))),
+            else_expr: Box::new(Expression::Literal(Literal::Number("2".to_string()))),
+        };
+        assert!(matches!(expr, Expression::Ternary { .. }));
     }
 
     #[test]
