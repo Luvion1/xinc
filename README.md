@@ -1,5 +1,8 @@
 # Xin Language
 
+[![Tests](https://github.com/Luvion1/xinc/actions/workflows/ci.yml/badge.svg)](https://github.com/Luvion1/xinc/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 A statically-typed compiled language with clean architecture and test-driven development.
 
 ## Features

@@ -4,6 +4,7 @@ members = [
     "crates/parser",
     "crates/ast",
     "crates/semantic",
+    "crates/codegen",
 ]
 
 [workspace.package]

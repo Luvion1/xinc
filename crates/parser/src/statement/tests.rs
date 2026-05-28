@@ -1,6 +1,5 @@
 //! Statement parser tests.
 
-use super::super::expression::parse_expression;
 use super::*;
 
 #[test]

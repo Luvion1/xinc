@@ -882,6 +882,18 @@ name = "xin-ast"
 version = "0.1.0"
 
 [[package]]
+name = "xin-codegen"
+version = "0.1.0"
+dependencies = [
+ "thiserror",
+ "tracing",
+ "xin-ast",
+ "xin-lexer",
+ "xin-parser",
+ "xin-semantic",
+]
+
+[[package]]
 name = "xin-lexer"
 version = "0.1.0"
 dependencies = [
