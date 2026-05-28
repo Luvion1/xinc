@@ -140,6 +140,8 @@ pub fn match_operator(kind: &TokenKind) -> Option<BinaryOp> {
         TokenKind::Neq => Some(BinaryOp::Neq),
         TokenKind::Lt => Some(BinaryOp::Lt),
         TokenKind::Gt => Some(BinaryOp::Gt),
+        TokenKind::Shl => Some(BinaryOp::Shl),
+        TokenKind::Shr => Some(BinaryOp::Shr),
         TokenKind::And => Some(BinaryOp::BitAnd),
         TokenKind::Or => Some(BinaryOp::BitOr),
         TokenKind::BitXor => Some(BinaryOp::BitXor),

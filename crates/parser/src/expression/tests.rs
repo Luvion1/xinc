@@ -64,22 +64,34 @@ fn test_parse_binary_mod() {
 }
 
 #[test]
-fn test_parse_binary_and() {
-    let expr = parse_expression("a & b").unwrap();
-    assert!(matches!(expr, Expression::Binary { op: BinaryOp::BitAnd, .. }));
-}
+    fn test_parse_binary_and() {
+        let expr = parse_expression("a & b").unwrap();
+        assert!(matches!(expr, Expression::Binary { op: BinaryOp::BitAnd, .. }));
+    }
 
-#[test]
-fn test_parse_binary_or() {
-    let expr = parse_expression("a | b").unwrap();
-    assert!(matches!(expr, Expression::Binary { op: BinaryOp::BitOr, .. }));
-}
+    #[test]
+    fn test_parse_binary_or() {
+        let expr = parse_expression("a | b").unwrap();
+        assert!(matches!(expr, Expression::Binary { op: BinaryOp::BitOr, .. }));
+    }
 
-#[test]
-fn test_parse_binary_xor() {
-    let expr = parse_expression("a ^ b").unwrap();
-    assert!(matches!(expr, Expression::Binary { op: BinaryOp::BitXor, .. }));
-}
+    #[test]
+    fn test_parse_binary_xor() {
+        let expr = parse_expression("a ^ b").unwrap();
+        assert!(matches!(expr, Expression::Binary { op: BinaryOp::BitXor, .. }));
+    }
+
+    #[test]
+    fn test_parse_binary_shl() {
+        let expr = parse_expression("1 << 4").unwrap();
+        assert!(matches!(expr, Expression::Binary { op: BinaryOp::Shl, .. }));
+    }
+
+    #[test]
+    fn test_parse_binary_shr() {
+        let expr = parse_expression("8 >> 2").unwrap();
+        assert!(matches!(expr, Expression::Binary { op: BinaryOp::Shr, .. }));
+    }
 
 #[test]
 fn test_parse_comparison_lt() {

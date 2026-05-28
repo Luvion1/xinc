@@ -52,6 +52,10 @@ pub enum BinaryOp {
     Lt,
     /// Greater than.
     Gt,
+    /// Left shift.
+    Shl,
+    /// Right shift.
+    Shr,
     /// Bitwise AND.
     BitAnd,
     /// Bitwise OR.
@@ -136,7 +140,7 @@ mod tests {
     fn test_binary_op_variants() {
         let ops = [BinaryOp::Add, BinaryOp::Sub, BinaryOp::Mul, BinaryOp::Div,
                     BinaryOp::Mod, BinaryOp::Eq, BinaryOp::Neq, BinaryOp::Lt, BinaryOp::Gt,
-                    BinaryOp::BitAnd, BinaryOp::BitOr, BinaryOp::BitXor];
+                    BinaryOp::Shl, BinaryOp::Shr, BinaryOp::BitAnd, BinaryOp::BitOr, BinaryOp::BitXor];
         for op in ops {
             assert_eq!(op, op);
         }
