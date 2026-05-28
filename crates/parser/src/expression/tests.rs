@@ -64,81 +64,57 @@ fn test_parse_binary_mod() {
 }
 
 #[test]
-    fn test_parse_binary_and() {
-        let expr = parse_expression("a & b").unwrap();
-        assert!(matches!(expr, Expression::Binary { op: BinaryOp::BitAnd, .. }));
-    }
+fn test_parse_binary_and() {
+    let expr = parse_expression("a & b").unwrap();
+    assert!(matches!(expr, Expression::Binary { op: BinaryOp::BitAnd, .. }));
+}
 
-    #[test]
-    fn test_parse_binary_or() {
-        let expr = parse_expression("a | b").unwrap();
-        assert!(matches!(expr, Expression::Binary { op: BinaryOp::BitOr, .. }));
-    }
+#[test]
+fn test_parse_binary_or() {
+    let expr = parse_expression("a | b").unwrap();
+    assert!(matches!(expr, Expression::Binary { op: BinaryOp::BitOr, .. }));
+}
 
-    #[test]
-    fn test_parse_binary_xor() {
-        let expr = parse_expression("a ^ b").unwrap();
-        assert!(matches!(expr, Expression::Binary { op: BinaryOp::BitXor, .. }));
-    }
+#[test]
+fn test_parse_binary_xor() {
+    let expr = parse_expression("a ^ b").unwrap();
+    assert!(matches!(expr, Expression::Binary { op: BinaryOp::BitXor, .. }));
+}
 
-    #[test]
-    fn test_parse_binary_shl() {
-        let expr = parse_expression("1 << 4").unwrap();
-        assert!(matches!(expr, Expression::Binary { op: BinaryOp::Shl, .. }));
-    }
+#[test]
+fn test_parse_binary_shl() {
+    let expr = parse_expression("1 << 4").unwrap();
+    assert!(matches!(expr, Expression::Binary { op: BinaryOp::Shl, .. }));
+}
 
-    #[test]
-    fn test_parse_binary_shr() {
-        let expr = parse_expression("8 >> 2").unwrap();
-        assert!(matches!(expr, Expression::Binary { op: BinaryOp::Shr, .. }));
-    }
+#[test]
+fn test_parse_binary_shr() {
+    let expr = parse_expression("8 >> 2").unwrap();
+    assert!(matches!(expr, Expression::Binary { op: BinaryOp::Shr, .. }));
+}
 
 #[test]
 fn test_parse_comparison_lt() {
     let expr = parse_expression("a < b").unwrap();
-    assert!(matches!(expr, Expression::Binary { .. }));
+    assert!(matches!(expr, Expression::Binary { op: BinaryOp::Lt, .. }));
 }
 
 #[test]
 fn test_parse_comparison_gt() {
     let expr = parse_expression("a > b").unwrap();
-    assert!(matches!(expr, Expression::Binary { .. }));
+    assert!(matches!(expr, Expression::Binary { op: BinaryOp::Gt, .. }));
 }
 
 #[test]
 fn test_parse_equality() {
     let expr = parse_expression("a == b").unwrap();
-    assert!(matches!(expr, Expression::Binary { .. }));
+    assert!(matches!(expr, Expression::Binary { op: BinaryOp::Eq, .. }));
 }
 
 #[test]
 fn test_parse_inequality() {
     let expr = parse_expression("a != b").unwrap();
-    assert!(matches!(expr, Expression::Binary { .. }));
-}
-
-#[test]
-fn test_parse_string_literal_expr() {
-    let expr = parse_expression("\"hello world\"").unwrap();
-    assert!(matches!(expr, Expression::Literal(Literal::String(_))));
-}
-
-#[test]
-fn test_parse_bool_false() {
-    let expr = parse_expression("false").unwrap();
-    assert!(matches!(expr, Expression::Literal(Literal::Boolean(false))));
-}
-
-#[test]
-fn test_parse_empty_input() {
-    let result = parse_expression("");
-    assert!(result.is_err());
-}
-
-#[test]
-fn test_parse_unknown_token() {
-    let result = parse_expression("@");
-    assert!(result.is_err());
+    assert!(matches!(expr, Expression::Binary { op: BinaryOp::Neq, .. }));
 }
 
 #[test]
@@ -180,15 +156,33 @@ fn test_parse_unary_minus() {
 }
 
 #[test]
-fn test_parse_modulo() {
-    let expr = parse_expression("10 % 3").unwrap();
-    assert!(matches!(expr, Expression::Binary { op: BinaryOp::Mod, .. }));
+fn test_parse_unary_bitnot() {
+    let expr = parse_expression("~x").unwrap();
+    assert!(matches!(expr, Expression::Unary { op: UnaryOp::BitNot, .. }));
 }
 
 #[test]
-fn test_parse_chain() {
-    let expr = parse_expression("1 + 2 + 3").unwrap();
-    assert!(matches!(expr, Expression::Binary { .. }));
+fn test_parse_string_literal_expr() {
+    let expr = parse_expression("\"hello world\"").unwrap();
+    assert!(matches!(expr, Expression::Literal(Literal::String(_))));
+}
+
+#[test]
+fn test_parse_bool_false() {
+    let expr = parse_expression("false").unwrap();
+    assert!(matches!(expr, Expression::Literal(Literal::Boolean(false))));
+}
+
+#[test]
+fn test_parse_empty_input() {
+    let result = parse_expression("");
+    assert!(result.is_err());
+}
+
+#[test]
+fn test_parse_unknown_token() {
+    let result = parse_expression("@");
+    assert!(result.is_err());
 }
 
 #[test]
@@ -210,7 +204,7 @@ fn test_parse_not_identifier() {
 }
 
 #[test]
-fn test_parse_bool_operator() {
+fn test_parse_bool_operator_eq() {
     let expr = parse_expression("a == b").unwrap();
     assert!(matches!(expr, Expression::Binary { op: BinaryOp::Eq, .. }));
 }
@@ -225,4 +219,16 @@ fn test_parse_ne_operator() {
 fn test_parse_gt_operator() {
     let expr = parse_expression("x > 10").unwrap();
     assert!(matches!(expr, Expression::Binary { op: BinaryOp::Gt, .. }));
+}
+
+#[test]
+fn test_parse_lt_operator() {
+    let expr = parse_expression("x < 10").unwrap();
+    assert!(matches!(expr, Expression::Binary { op: BinaryOp::Lt, .. }));
+}
+
+#[test]
+fn test_parse_chain() {
+    let expr = parse_expression("1 + 2 + 3").unwrap();
+    assert!(matches!(expr, Expression::Binary { .. }));
 }

@@ -127,9 +127,75 @@ mod tests {
     }
 
     #[test]
-    fn test_literal_string() {
-        let lit = Literal::String("hello".to_string());
-        assert_eq!(lit, Literal::String("hello".to_string()));
+    fn test_string_empty() {
+        let lit = Literal::String("".to_string());
+        assert_eq!(lit, Literal::String("".to_string()));
+    }
+
+    #[test]
+    fn test_string_with_escapes() {
+        let lit = Literal::String("hello\\nworld".to_string());
+        assert_eq!(lit, Literal::String("hello\\nworld".to_string()));
+    }
+
+    #[test]
+    fn test_string_unicode() {
+        let lit = Literal::String("日本語".to_string());
+        assert_eq!(lit, Literal::String("日本語".to_string()));
+    }
+
+    #[test]
+    fn test_string_line_continuation() {
+        let lit = Literal::String("a\\\\b".to_string());
+        assert_eq!(lit, Literal::String("a\\\\b".to_string()));
+    }
+
+    #[test]
+    fn test_string_tab() {
+        let lit = Literal::String("a\\tb".to_string());
+        assert_eq!(lit, Literal::String("a\\tb".to_string()));
+    }
+
+    #[test]
+    fn test_string_carriage_return() {
+        let lit = Literal::String("a\\rb".to_string());
+        assert_eq!(lit, Literal::String("a\\rb".to_string()));
+    }
+
+    #[test]
+    fn test_string_null() {
+        let lit = Literal::String("a\\0b".to_string());
+        assert_eq!(lit, Literal::String("a\\0b".to_string()));
+    }
+
+    #[test]
+    fn test_string_single_quote() {
+        let lit = Literal::String("a\\'b".to_string());
+        assert_eq!(lit, Literal::String("a\\'b".to_string()));
+    }
+
+    #[test]
+    fn test_string_double_quote() {
+        let lit = Literal::String("a\\\"b".to_string());
+        assert_eq!(lit, Literal::String("a\\\"b".to_string()));
+    }
+
+    #[test]
+    fn test_string_backslash() {
+        let lit = Literal::String("a\\\\b".to_string());
+        assert_eq!(lit, Literal::String("a\\\\b".to_string()));
+    }
+
+    #[test]
+    fn test_string_octal() {
+        let lit = Literal::String("a\\123b".to_string());
+        assert_eq!(lit, Literal::String("a\\123b".to_string()));
+    }
+
+    #[test]
+    fn test_string_hex() {
+        let lit = Literal::String("a\\xab".to_string());
+        assert_eq!(lit, Literal::String("a\\xab".to_string()));
     }
 
     #[test]

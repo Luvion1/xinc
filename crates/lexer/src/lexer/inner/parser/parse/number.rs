@@ -171,10 +171,10 @@ mod tests {
     }
 
     #[test]
-    fn test_binary() {
-        let mut s = Scanner::new("0b1010");
+    fn test_number_negative() {
+        let mut s = Scanner::new("-42");
         let val = parse_number(&mut s).unwrap();
-        assert_eq!(val, "0b1010");
+        assert_eq!(val, "-42");
     }
 
     #[test]

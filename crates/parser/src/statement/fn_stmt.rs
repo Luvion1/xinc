@@ -2,7 +2,6 @@
 
 use xin_ast::Statement;
 use xin_lexer::TokenKind;
-use super::super::expression::parse_expression_from_tokens;
 use super::super::expression::ParserError;
 use crate::statement::parse_statements_from_tokens;
 use super::let_stmt::{parse_identifier, parse_type};
