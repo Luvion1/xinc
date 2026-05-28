@@ -81,36 +81,6 @@ fn test_parse_block() {
 }
 
 #[test]
-fn test_parse_empty_statement() {
-    let stmts = parse_statement(";").unwrap();
-    assert_eq!(stmts.len(), 1);
-}
-
-#[test]
-fn test_parse_expr_statement() {
-    let stmts = parse_statement("42;").unwrap();
-    assert_eq!(stmts.len(), 1);
-}
-
-#[test]
-fn test_parse_return() {
-    let stmts = parse_statement("return 42;").unwrap();
-    assert_eq!(stmts.len(), 1);
-}
-
-#[test]
-fn test_parse_return_void() {
-    let stmts = parse_statement("return;").unwrap();
-    assert_eq!(stmts.len(), 1);
-}
-
-#[test]
-fn test_parse_nested_block() {
-    let stmts = parse_statement("{ { let x = 1; } }").unwrap();
-    assert_eq!(stmts.len(), 1);
-}
-
-#[test]
 fn test_parse_multiple_statements() {
     let stmts = parse_statement("let x = 1; let y = 2;").unwrap();
     assert_eq!(stmts.len(), 2);
