@@ -52,6 +52,12 @@ pub enum BinaryOp {
     Lt,
     /// Greater than.
     Gt,
+    /// Bitwise AND.
+    BitAnd,
+    /// Bitwise OR.
+    BitOr,
+    /// Bitwise XOR.
+    BitXor,
 }
 
 /// Unary operator.
@@ -61,6 +67,8 @@ pub enum UnaryOp {
     Neg,
     /// Not.
     Not,
+    /// Bitwise NOT.
+    BitNot,
 }
 
 #[cfg(test)]
@@ -127,7 +135,16 @@ mod tests {
     #[test]
     fn test_binary_op_variants() {
         let ops = [BinaryOp::Add, BinaryOp::Sub, BinaryOp::Mul, BinaryOp::Div,
-                    BinaryOp::Mod, BinaryOp::Eq, BinaryOp::Neq, BinaryOp::Lt, BinaryOp::Gt];
+                    BinaryOp::Mod, BinaryOp::Eq, BinaryOp::Neq, BinaryOp::Lt, BinaryOp::Gt,
+                    BinaryOp::BitAnd, BinaryOp::BitOr, BinaryOp::BitXor];
+        for op in ops {
+            assert_eq!(op, op);
+        }
+    }
+
+    #[test]
+    fn test_unary_op_variants() {
+        let ops = [UnaryOp::Neg, UnaryOp::Not, UnaryOp::BitNot];
         for op in ops {
             assert_eq!(op, op);
         }

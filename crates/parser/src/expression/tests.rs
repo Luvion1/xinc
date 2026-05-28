@@ -64,6 +64,24 @@ fn test_parse_binary_mod() {
 }
 
 #[test]
+fn test_parse_binary_and() {
+    let expr = parse_expression("a & b").unwrap();
+    assert!(matches!(expr, Expression::Binary { op: BinaryOp::BitAnd, .. }));
+}
+
+#[test]
+fn test_parse_binary_or() {
+    let expr = parse_expression("a | b").unwrap();
+    assert!(matches!(expr, Expression::Binary { op: BinaryOp::BitOr, .. }));
+}
+
+#[test]
+fn test_parse_binary_xor() {
+    let expr = parse_expression("a ^ b").unwrap();
+    assert!(matches!(expr, Expression::Binary { op: BinaryOp::BitXor, .. }));
+}
+
+#[test]
 fn test_parse_comparison_lt() {
     let expr = parse_expression("a < b").unwrap();
     assert!(matches!(expr, Expression::Binary { .. }));
