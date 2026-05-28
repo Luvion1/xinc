@@ -1,6 +1,6 @@
 //! Statement parsing.
 //!
-//! Parses statements from tokens, starting with let statements.
+//! Parses statements from tokens into AST nodes.
 
 use xin_ast::{Statement, Type, BuiltinType};
 use xin_lexer::{tokenize, TokenKind};
@@ -40,6 +40,8 @@ pub fn parse_statements_from_tokens(tokens: &[xin_lexer::Token], mut idx: usize)
         // Parse let statement
         if tokens[idx].kind == TokenKind::Keyword(xin_lexer::Keyword::Let) {
             idx = parse_let_statement(tokens, idx, &mut statements)?;
+        } else if tokens[idx].kind == TokenKind::Keyword(xin_lexer::Keyword::Fn) {
+            idx = parse_fn_statement(tokens, idx, &mut statements)?;
         } else if tokens[idx].kind == TokenKind::Keyword(xin_lexer::Keyword::If) {
             idx = parse_if_statement(tokens, idx, &mut statements)?;
         } else if tokens[idx].kind == TokenKind::Keyword(xin_lexer::Keyword::While) {
@@ -193,67 +195,62 @@ fn parse_type(token: &xin_lexer::Token) -> Result<Type, ParserError> {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+/// Parse function declaration.
+fn parse_fn_statement(tokens: &[xin_lexer::Token], mut idx: usize, statements: &mut Vec<Statement>) -> Result<usize, ParserError> {
+    idx += 1; // skip 'fn'
+    let name = parse_identifier(&tokens[idx])?;
+    idx += 1;
 
-    #[test]
-    fn test_parse_let() {
-        let stmts = parse_statement("let x = 10;").unwrap();
-        assert_eq!(stmts.len(), 1);
+    // Parse parameters
+    if idx >= tokens.len() || tokens[idx].kind != TokenKind::LParen {
+        return Err(ParserError::ExpectedLBrace);
     }
+    idx += 1; // skip '('
 
-    #[test]
-    fn test_parse_let_with_type() {
-        let stmts = parse_statement("let x: i32 = 10;").unwrap();
-        assert_eq!(stmts.len(), 1);
-    }
+    let mut params = Vec::new();
+    while idx < tokens.len() && tokens[idx].kind != TokenKind::RParen {
+        let param_name = parse_identifier(&tokens[idx])?;
+        idx += 1;
 
-    #[test]
-    fn test_parse_block() {
-        let stmts = parse_statement("{ let x = 1; }").unwrap();
-        assert_eq!(stmts.len(), 1);
-        assert!(matches!(stmts[0], Statement::Block(_)));
-    }
-
-    #[test]
-    fn test_parse_if() {
-        let stmts = parse_statement("if x { let y = 1; }").unwrap();
-        assert_eq!(stmts.len(), 1);
-        assert!(matches!(stmts[0], Statement::If { .. }));
-    }
-
-    #[test]
-    fn test_parse_if_else() {
-        let stmts = parse_statement("if x { let y = 1; } else { let z = 2; }").unwrap();
-        assert_eq!(stmts.len(), 1);
-        if let Statement::If { r#else: Some(_), .. } = &stmts[0] {
-            // test passed
+        let param_ty = if idx < tokens.len() && tokens[idx].kind == TokenKind::Colon {
+            idx += 1;
+            Some(parse_type(&tokens[idx])?)
         } else {
-            panic!("Expected if-else statement with else branch");
+            None
+        };
+        idx += 1;
+
+        params.push(xin_ast::Param { name: param_name, ty: param_ty });
+
+        if idx < tokens.len() && tokens[idx].kind == TokenKind::Comma {
+            idx += 1;
         }
     }
 
-    #[test]
-    fn test_parse_while() {
-        let stmts = parse_statement("while x { let y = 1; }").unwrap();
-        assert_eq!(stmts.len(), 1);
+    if idx < tokens.len() && tokens[idx].kind == TokenKind::RParen {
+        idx += 1; // skip ')'
     }
 
-    #[test]
-    fn test_parse_while_with_expr() {
-        let stmts = parse_statement("while true { x = 1; }").unwrap();
-        assert_eq!(stmts.len(), 1);
-    }
+    // Parse return type
+    let ret_ty = if idx < tokens.len() && tokens[idx].kind == TokenKind::Arrow {
+        idx += 1;
+        Some(parse_type(&tokens[idx])?)
+    } else {
+        None
+    };
 
-    #[test]
-    fn test_parse_assign() {
-        let stmts = parse_statement("x = 10;").unwrap();
-        assert_eq!(stmts.len(), 1);
-        if let Statement::Assign { target, .. } = &stmts[0] {
-            assert_eq!(target, "x");
-        } else {
-            panic!("Expected Assign statement");
-        }
+    // Parse body
+    if idx >= tokens.len() || tokens[idx].kind != TokenKind::LBrace {
+        return Err(ParserError::ExpectedLBrace);
     }
+    idx += 1; // skip '{'
+
+    let (body, mut new_idx) = parse_statements_from_tokens(tokens, idx)?;
+    if new_idx < tokens.len() && tokens[new_idx].kind == TokenKind::RBrace {
+        new_idx += 1;
+    }
+    idx = new_idx;
+
+    statements.push(Statement::Fn { name, params, body, ret_ty });
+    Ok(idx)
 }

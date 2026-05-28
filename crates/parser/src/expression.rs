@@ -130,6 +130,7 @@ pub fn match_operator(kind: &TokenKind) -> Option<BinaryOp> {
         TokenKind::Minus => Some(BinaryOp::Sub),
         TokenKind::Star => Some(BinaryOp::Mul),
         TokenKind::Slash => Some(BinaryOp::Div),
+        TokenKind::Percent => Some(BinaryOp::Mod),
         TokenKind::Eq => Some(BinaryOp::Eq),
         TokenKind::Neq => Some(BinaryOp::Neq),
         TokenKind::Lt => Some(BinaryOp::Lt),
@@ -237,6 +238,12 @@ mod tests {
     }
 
     #[test]
+    fn test_parse_binary_mod() {
+        let expr = parse_expression("10 % 3").unwrap();
+        assert!(matches!(expr, Expression::Binary { op: BinaryOp::Mod, .. }));
+    }
+
+    #[test]
     fn test_parse_comparison_lt() {
         let expr = parse_expression("a < b").unwrap();
         assert!(matches!(expr, Expression::Binary { .. }));
@@ -320,5 +327,53 @@ mod tests {
     fn test_parse_unary_minus() {
         let expr = parse_expression("-5").unwrap();
         assert!(matches!(expr, Expression::Unary { op: UnaryOp::Neg, .. }));
+    }
+
+    #[test]
+    fn test_parse_modulo() {
+        let expr = parse_expression("10 % 3").unwrap();
+        assert!(matches!(expr, Expression::Binary { op: BinaryOp::Mod, .. }));
+    }
+
+    #[test]
+    fn test_parse_chain() {
+        let expr = parse_expression("1 + 2 + 3").unwrap();
+        assert!(matches!(expr, Expression::Binary { .. }));
+    }
+
+    #[test]
+    fn test_parse_nested_parens() {
+        let expr = parse_expression("((x))").unwrap();
+        assert!(matches!(expr, Expression::Identifier(_)));
+    }
+
+    #[test]
+    fn test_parse_negative_paren() {
+        let expr = parse_expression("-(x)").unwrap();
+        assert!(matches!(expr, Expression::Unary { op: UnaryOp::Neg, .. }));
+    }
+
+    #[test]
+    fn test_parse_not_identifier() {
+        let expr = parse_expression("!x").unwrap();
+        assert!(matches!(expr, Expression::Unary { op: UnaryOp::Not, .. }));
+    }
+
+    #[test]
+    fn test_parse_bool_operator() {
+        let expr = parse_expression("a == b").unwrap();
+        assert!(matches!(expr, Expression::Binary { op: BinaryOp::Eq, .. }));
+    }
+
+    #[test]
+    fn test_parse_ne_operator() {
+        let expr = parse_expression("a != b").unwrap();
+        assert!(matches!(expr, Expression::Binary { op: BinaryOp::Neq, .. }));
+    }
+
+    #[test]
+    fn test_parse_gt_operator() {
+        let expr = parse_expression("x > 10").unwrap();
+        assert!(matches!(expr, Expression::Binary { op: BinaryOp::Gt, .. }));
     }
 }

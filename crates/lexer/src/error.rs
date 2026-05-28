@@ -88,4 +88,16 @@ mod tests {
         let err = LexerError::InvalidNumber { reason: "overflow".to_string() };
         assert!(err.to_string().contains("overflow"));
     }
+
+    #[test]
+    fn test_unterminated_char() {
+        let err = LexerError::UnterminatedChar;
+        assert!(err.to_string().contains("Unterminated"));
+    }
+
+    #[test]
+    fn test_unterminated_comment() {
+        let err = LexerError::UnterminatedComment;
+        assert!(err.to_string().contains("Unterminated"));
+    }
 }

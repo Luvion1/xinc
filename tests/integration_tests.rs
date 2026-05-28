@@ -63,4 +63,18 @@ mod tests {
         let stmts = parse_statement(source).unwrap();
         assert_eq!(stmts.len(), 2);
     }
+
+    #[test]
+    fn test_pipeline_while_statement() {
+        let source = "while x { x = 1; }";
+        let stmts = parse_statement(source).unwrap();
+        assert!(!stmts.is_empty());
+    }
+
+    #[test]
+    fn test_pipeline_modulo() {
+        let source = "let z = 10 % 3;";
+        let stmts = parse_statement(source).unwrap();
+        assert_eq!(stmts.len(), 1);
+    }
 }

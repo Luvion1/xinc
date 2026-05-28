@@ -42,6 +42,8 @@ pub enum BinaryOp {
     Mul,
     /// Division.
     Div,
+    /// Modulo.
+    Mod,
     /// Equality.
     Eq,
     /// Inequality.
@@ -125,7 +127,7 @@ mod tests {
     #[test]
     fn test_binary_op_variants() {
         let ops = [BinaryOp::Add, BinaryOp::Sub, BinaryOp::Mul, BinaryOp::Div,
-                    BinaryOp::Eq, BinaryOp::Neq, BinaryOp::Lt, BinaryOp::Gt];
+                    BinaryOp::Mod, BinaryOp::Eq, BinaryOp::Neq, BinaryOp::Lt, BinaryOp::Gt];
         for op in ops {
             assert_eq!(op, op);
         }
