@@ -15,6 +15,18 @@ fn test_parse_let_with_type() {
 }
 
 #[test]
+fn test_parse_let_string() {
+    let stmts = parse_statement("let s = \"hello\";").unwrap();
+    assert_eq!(stmts.len(), 1);
+}
+
+#[test]
+fn test_parse_let_bool() {
+    let stmts = parse_statement("let flag = true;").unwrap();
+    assert_eq!(stmts.len(), 1);
+}
+
+#[test]
 fn test_parse_if() {
     let stmts = parse_statement("if true { let x = 1; }").unwrap();
     assert_eq!(stmts.len(), 1);
@@ -51,6 +63,12 @@ fn test_parse_fn_with_params() {
 }
 
 #[test]
+fn test_parse_fn_with_return() {
+    let stmts = parse_statement("fn get() -> i32 { return 42; }").unwrap();
+    assert_eq!(stmts.len(), 1);
+}
+
+#[test]
 fn test_parse_assign() {
     let stmts = parse_statement("x = 1;").unwrap();
     assert_eq!(stmts.len(), 1);
@@ -60,4 +78,40 @@ fn test_parse_assign() {
 fn test_parse_block() {
     let stmts = parse_statement("{ let x = 1; }").unwrap();
     assert_eq!(stmts.len(), 1);
+}
+
+#[test]
+fn test_parse_empty_statement() {
+    let stmts = parse_statement(";").unwrap();
+    assert_eq!(stmts.len(), 1);
+}
+
+#[test]
+fn test_parse_expr_statement() {
+    let stmts = parse_statement("42;").unwrap();
+    assert_eq!(stmts.len(), 1);
+}
+
+#[test]
+fn test_parse_return() {
+    let stmts = parse_statement("return 42;").unwrap();
+    assert_eq!(stmts.len(), 1);
+}
+
+#[test]
+fn test_parse_return_void() {
+    let stmts = parse_statement("return;").unwrap();
+    assert_eq!(stmts.len(), 1);
+}
+
+#[test]
+fn test_parse_nested_block() {
+    let stmts = parse_statement("{ { let x = 1; } }").unwrap();
+    assert_eq!(stmts.len(), 1);
+}
+
+#[test]
+fn test_parse_multiple_statements() {
+    let stmts = parse_statement("let x = 1; let y = 2;").unwrap();
+    assert_eq!(stmts.len(), 2);
 }
