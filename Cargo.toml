@@ -1,0 +1,33 @@
+[workspace]
+members = [
+    "crates/lexer",
+    "crates/parser",
+    "crates/ast",
+    "crates/semantic",
+]
+
+[workspace.package]
+edition = "2024"
+license = "MIT OR Apache-2.0"
+authors = ["Xin Team"]
+
+[package]
+name = "xin"
+version = "0.1.0"
+edition = "2024"
+description = "Xin language compiler CLI"
+authors = ["Xin Team"]
+license = "MIT OR Apache-2.0"
+
+[[bin]]
+name = "xin"
+path = "src/main.rs"
+
+[dependencies]
+clap = { version = "4.0", features = ["derive"] }
+xin-ast = { path = "crates/ast" }
+xin-lexer = { path = "crates/lexer" }
+xin-parser = { path = "crates/parser" }
+xin-semantic = { path = "crates/semantic" }
+tracing = "0.1"
+tracing-subscriber = "0.3"

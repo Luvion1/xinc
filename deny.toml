@@ -1,0 +1,46 @@
+# See https://github.com/EmbarkStudios/cargo-deny for more information
+
+[licenses]
+# Action to take when a license is denied
+deny = ["GPL-3.0", "AGPL-3.0"]
+# Action to take when a license requires attribution
+notice = ["MIT", "Apache-2.0"]
+# Action to take when a license is restricted
+restrict = ["LGPL-2.1", "LGPL-3.0"]
+# Action to take when a license is not recognized
+unknown = "warn"
+
+# Whether to check licenses for dependencies
+check = true
+
+[advisories]
+# Whether to check for security advisories
+check = true
+# Directory to load advisory db from; if None, uses the built-in db
+# db = None
+# Whether to load the advisory db from git
+# load-db-from-git = true
+# Whether to ignore yanked crates
+ignore-yanked = false
+# Whether to ignore dependencies with no known versions
+# ignore-unversioned = false
+# Whether to ignore dev-dependencies
+ignore-dev-deps = false
+# Whether to ignore dependencies that are only used in build scripts
+# ignore-build = false
+
+[bans]
+# crates to ban, regardless of version
+# krate = "name"
+# version = ">0.7"
+# Because this list can get long, you can also specify a path to a file
+# containing the bans, one per line, in the same format as below.
+# path = "deny-bans.txt"
+
+[sources]
+# Whether to crates.io is allowed
+crates-io = { allow = true }
+# Whether to allow git sources
+git = { allow = true }
+# Whether to allow local sources (path overrides)
+local = { allow = true }

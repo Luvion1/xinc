@@ -1,0 +1,17 @@
+[package]
+name = "xin-lexer"
+version = "0.1.0"
+edition = "2024"
+description = "Core lexer functionality for Xin language"
+authors = ["Xin Team"]
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+thiserror = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+unicode-properties = "0.1.4"
+tracing = "0.1"
+
+[dev-dependencies]
+proptest = "1.4"
+pretty_assertions = "1.0"

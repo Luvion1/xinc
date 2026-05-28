@@ -1,0 +1,15 @@
+[package]
+name = "xin-parser"
+version = "0.1.0"
+edition = "2024"
+description = "Xin language parser"
+authors = ["Xin Team"]
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+xin-lexer = { path = "../lexer" }
+xin-ast = { path = "../ast" }
+thiserror = "1.0"
+
+[dev-dependencies]
+proptest = "1.4"
