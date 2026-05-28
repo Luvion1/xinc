@@ -72,6 +72,12 @@ impl Analyzer {
                     self.analyze(stmt)?;
                 }
             }
+            Statement::Assign { target, value } => {
+                if self.symbols.lookup(target).is_none() {
+                    return Err(SemanticError::UndefinedVariable(target.clone()));
+                }
+                self.check_expr(value)?;
+            }
         }
         Ok(())
     }

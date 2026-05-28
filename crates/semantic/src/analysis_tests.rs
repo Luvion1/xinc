@@ -173,4 +173,15 @@ mod tests {
         });
         analyzer.analyze(&stmt).unwrap();
     }
+
+    #[test]
+    fn test_analyzer_assign() {
+        let mut analyzer = Analyzer::new();
+        let stmt = Statement::Assign {
+            target: "x".to_string(),
+            value: Expression::Literal(Literal::Number("10".to_string())),
+        };
+        // This should fail because x is not defined
+        assert!(analyzer.analyze(&stmt).is_err());
+    }
 }

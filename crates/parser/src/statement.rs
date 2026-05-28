@@ -154,6 +154,21 @@ fn parse_while_statement(tokens: &[xin_lexer::Token], mut idx: usize, statements
     Ok(idx)
 }
 
+/// Parse assignment statement.
+fn parse_assign_statement(tokens: &[xin_lexer::Token], mut idx: usize, statements: &mut Vec<Statement>, name: String) -> Result<usize, ParserError> {
+    idx += 1; // skip 'x' (already have name)
+    idx += 1; // skip '='
+    let (value, new_idx) = parse_expression_from_tokens(tokens, idx)?;
+    idx = new_idx;
+
+    if idx < tokens.len() && tokens[idx].kind == TokenKind::Semicolon {
+        idx += 1;
+    }
+
+    statements.push(Statement::Assign { target: name, value });
+    Ok(idx)
+}
+
 /// Parse identifier from token.
 fn parse_identifier(token: &xin_lexer::Token) -> Result<String, ParserError> {
     match &token.kind {
@@ -229,5 +244,16 @@ mod tests {
     fn test_parse_while_with_expr() {
         let stmts = parse_statement("while true { x = 1; }").unwrap();
         assert_eq!(stmts.len(), 1);
+    }
+
+    #[test]
+    fn test_parse_assign() {
+        let stmts = parse_statement("x = 10;").unwrap();
+        assert_eq!(stmts.len(), 1);
+        if let Statement::Assign { target, .. } = &stmts[0] {
+            assert_eq!(target, "x");
+        } else {
+            panic!("Expected Assign statement");
+        }
     }
 }
