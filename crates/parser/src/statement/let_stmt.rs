@@ -1,16 +1,20 @@
 //! Let statement parser.
 
+use super::super::expression::{ParserError, parse_expression_from_tokens};
 use xin_ast::Statement;
+use xin_ast::{BuiltinType, Type};
 use xin_lexer::TokenKind;
-use super::super::expression::{parse_expression_from_tokens, ParserError};
-use xin_ast::{Type, BuiltinType};
 
 /// Parse let statement.
-pub fn parse_let_statement(tokens: &[xin_lexer::Token], mut idx: usize, statements: &mut Vec<Statement>) -> Result<usize, ParserError> {
+pub fn parse_let_statement(
+    tokens: &[xin_lexer::Token],
+    mut idx: usize,
+    statements: &mut Vec<Statement>,
+) -> Result<usize, ParserError> {
     idx += 1;
     let name = parse_identifier(&tokens[idx])?;
     idx += 1;
-    
+
     let ty = if idx < tokens.len() && tokens[idx].kind == TokenKind::Colon {
         idx += 1;
         let ty = parse_type(&tokens[idx])?;

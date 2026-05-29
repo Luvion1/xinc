@@ -95,12 +95,8 @@ mod tests {
 
     #[test]
     fn test_fn_statement() {
-        let stmt = Statement::Fn {
-            name: "main".to_string(),
-            params: vec![],
-            body: vec![],
-            ret_ty: None,
-        };
+        let stmt =
+            Statement::Fn { name: "main".to_string(), params: vec![], body: vec![], ret_ty: None };
         assert!(matches!(stmt, Statement::Fn { .. }));
     }
 
@@ -118,8 +114,14 @@ mod tests {
 
     #[test]
     fn test_builtin_type_variants() {
-        let types = [BuiltinType::I32, BuiltinType::I64, BuiltinType::F32,
-                     BuiltinType::F64, BuiltinType::Bool, BuiltinType::Str];
+        let types = [
+            BuiltinType::I32,
+            BuiltinType::I64,
+            BuiltinType::F32,
+            BuiltinType::F64,
+            BuiltinType::Bool,
+            BuiltinType::Str,
+        ];
         for t in types {
             assert_eq!(t, t);
         }
@@ -127,9 +129,6 @@ mod tests {
 
     #[test]
     fn test_type_equality() {
-        assert_eq!(
-            Type::Builtin(BuiltinType::I32),
-            Type::Builtin(BuiltinType::I32)
-        );
+        assert_eq!(Type::Builtin(BuiltinType::I32), Type::Builtin(BuiltinType::I32));
     }
 }

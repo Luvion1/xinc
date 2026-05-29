@@ -2,9 +2,9 @@
 //!
 //! Performs type checking and name resolution.
 
+use super::SemanticError;
 use crate::symbol::{Symbol, SymbolTable};
 use xin_ast::{Expression, Statement};
-use super::SemanticError;
 
 /// Semantic analyzer.
 pub struct Analyzer {
@@ -14,9 +14,7 @@ pub struct Analyzer {
 impl Analyzer {
     /// Create new analyzer.
     pub fn new() -> Self {
-        Self {
-            symbols: SymbolTable::new(),
-        }
+        Self { symbols: SymbolTable::new() }
     }
 
     /// Analyze a statement.
@@ -25,20 +23,14 @@ impl Analyzer {
             Statement::Let { name, ty, value } => {
                 self.symbols.insert(
                     name.clone(),
-                    Symbol {
-                        ty: ty.clone().map(|t| format!("{:?}", t)),
-                        mutable: true,
-                    },
+                    Symbol { ty: ty.clone().map(|t| format!("{:?}", t)), mutable: true },
                 );
                 self.check_expr(value)?;
             }
             Statement::Fn { name, params: _, body, ret_ty } => {
                 self.symbols.insert(
                     name.clone(),
-                    Symbol {
-                        ty: ret_ty.as_ref().map(|t| format!("{:?}", t)),
-                        mutable: false,
-                    },
+                    Symbol { ty: ret_ty.as_ref().map(|t| format!("{:?}", t)), mutable: false },
                 );
                 for stmt in body {
                     self.analyze(stmt)?;
@@ -123,8 +115,8 @@ impl Default for Analyzer {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use xin_ast::{BinaryOp, Literal, UnaryOp};
     use xin_ast::Type;
+    use xin_ast::{BinaryOp, Literal, UnaryOp};
 
     #[test]
     fn test_analyzer_new() {
@@ -183,7 +175,9 @@ mod tests {
         let stmt = Statement::If {
             cond: Expression::Literal(Literal::Boolean(true)),
             then: vec![Statement::Expr(Expression::Literal(Literal::Number("1".to_string())))],
-            r#else: Some(Box::new(Statement::Expr(Expression::Literal(Literal::Number("2".to_string()))))),
+            r#else: Some(Box::new(Statement::Expr(Expression::Literal(Literal::Number(
+                "2".to_string(),
+            ))))),
         };
         assert!(analyzer.analyze(&stmt).is_ok());
     }
@@ -191,10 +185,8 @@ mod tests {
     #[test]
     fn test_analyze_while_ok() {
         let mut analyzer = Analyzer::new();
-        let stmt = Statement::While {
-            cond: Expression::Literal(Literal::Boolean(true)),
-            body: vec![],
-        };
+        let stmt =
+            Statement::While { cond: Expression::Literal(Literal::Boolean(true)), body: vec![] };
         assert!(analyzer.analyze(&stmt).is_ok());
     }
 
@@ -227,7 +219,9 @@ mod tests {
     #[test]
     fn test_analyze_block_ok() {
         let mut analyzer = Analyzer::new();
-        let stmt = Statement::Block(vec![Statement::Expr(Expression::Literal(Literal::Number("1".to_string())))]);
+        let stmt = Statement::Block(vec![Statement::Expr(Expression::Literal(Literal::Number(
+            "1".to_string(),
+        )))]);
         assert!(analyzer.analyze(&stmt).is_ok());
     }
 

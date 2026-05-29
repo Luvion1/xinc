@@ -1,7 +1,7 @@
 //! Expression parser tests.
 
 use super::parser::*;
-use xin_ast::{Expression, Literal, BinaryOp, UnaryOp};
+use xin_ast::{BinaryOp, Expression, Literal, UnaryOp};
 
 #[test]
 fn test_parse_identifier() {

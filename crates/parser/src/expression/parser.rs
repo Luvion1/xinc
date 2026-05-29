@@ -1,7 +1,7 @@
 //! Expression parser implementation.
 
-use xin_ast::{Expression, Literal, BinaryOp, UnaryOp};
-use xin_lexer::{tokenize, TokenKind, LexerError};
+use xin_ast::{BinaryOp, Expression, Literal, UnaryOp};
+use xin_lexer::{LexerError, TokenKind, tokenize};
 
 /// Parse an expression from source.
 pub fn parse_expression(source: &str) -> Result<Expression, ParserError> {
@@ -14,7 +14,10 @@ pub fn parse_expression(source: &str) -> Result<Expression, ParserError> {
 }
 
 /// Parse expression from pre-tokenized tokens.
-pub fn parse_expression_from_tokens(tokens: &[xin_lexer::Token], mut idx: usize) -> Result<(Expression, usize), ParserError> {
+pub fn parse_expression_from_tokens(
+    tokens: &[xin_lexer::Token],
+    mut idx: usize,
+) -> Result<(Expression, usize), ParserError> {
     let result = parse_expr(tokens, &mut idx)?;
     Ok((result, idx))
 }
@@ -22,20 +25,16 @@ pub fn parse_expression_from_tokens(tokens: &[xin_lexer::Token], mut idx: usize)
 /// Recursive expression parsing with operator precedence.
 pub fn parse_expr(tokens: &[xin_lexer::Token], idx: &mut usize) -> Result<Expression, ParserError> {
     let left = parse_atom(tokens, idx)?;
-    
+
     #[allow(clippy::collapsible_if)]
     if *idx < tokens.len() {
         if let Some(op) = match_operator(&tokens[*idx].kind) {
             *idx += 1;
             let right = parse_atom(tokens, idx)?;
-            return Ok(Expression::Binary {
-                left: Box::new(left),
-                op,
-                right: Box::new(right),
-            });
+            return Ok(Expression::Binary { left: Box::new(left), op, right: Box::new(right) });
         }
     }
-    
+
     Ok(left)
 }
 
@@ -47,6 +46,7 @@ pub fn parse_atom(tokens: &[xin_lexer::Token], idx: &mut usize) -> Result<Expres
 
     match &tokens[*idx].kind {
         TokenKind::Not => parse_unary_not(tokens, idx),
+        TokenKind::BitNot => parse_unary_bitnot(tokens, idx),
         TokenKind::Minus => parse_unary_neg(tokens, idx),
         TokenKind::Identifier(name) => parse_identifier_expr(tokens, idx, name.clone()),
         TokenKind::Number(n) => parse_number_expr(tokens, idx, n.clone()),
@@ -57,19 +57,38 @@ pub fn parse_atom(tokens: &[xin_lexer::Token], idx: &mut usize) -> Result<Expres
     }
 }
 
-fn parse_unary_not(tokens: &[xin_lexer::Token], idx: &mut usize) -> Result<Expression, ParserError> {
+fn parse_unary_not(
+    tokens: &[xin_lexer::Token],
+    idx: &mut usize,
+) -> Result<Expression, ParserError> {
     *idx += 1;
     let operand = parse_atom(tokens, idx)?;
     Ok(Expression::Unary { op: UnaryOp::Not, operand: Box::new(operand) })
 }
 
-fn parse_unary_neg(tokens: &[xin_lexer::Token], idx: &mut usize) -> Result<Expression, ParserError> {
+fn parse_unary_bitnot(
+    tokens: &[xin_lexer::Token],
+    idx: &mut usize,
+) -> Result<Expression, ParserError> {
+    *idx += 1;
+    let operand = parse_atom(tokens, idx)?;
+    Ok(Expression::Unary { op: UnaryOp::BitNot, operand: Box::new(operand) })
+}
+
+fn parse_unary_neg(
+    tokens: &[xin_lexer::Token],
+    idx: &mut usize,
+) -> Result<Expression, ParserError> {
     *idx += 1;
     let operand = parse_atom(tokens, idx)?;
     Ok(Expression::Unary { op: UnaryOp::Neg, operand: Box::new(operand) })
 }
 
-fn parse_identifier_expr(tokens: &[xin_lexer::Token], idx: &mut usize, name: String) -> Result<Expression, ParserError> {
+fn parse_identifier_expr(
+    tokens: &[xin_lexer::Token],
+    idx: &mut usize,
+    name: String,
+) -> Result<Expression, ParserError> {
     *idx += 1;
     if *idx < tokens.len() && tokens[*idx].kind == TokenKind::LParen {
         parse_call_expr(tokens, idx, name)
@@ -78,7 +97,11 @@ fn parse_identifier_expr(tokens: &[xin_lexer::Token], idx: &mut usize, name: Str
     }
 }
 
-fn parse_call_expr(tokens: &[xin_lexer::Token], idx: &mut usize, name: String) -> Result<Expression, ParserError> {
+fn parse_call_expr(
+    tokens: &[xin_lexer::Token],
+    idx: &mut usize,
+    name: String,
+) -> Result<Expression, ParserError> {
     *idx += 1;
     let mut args = Vec::new();
     while *idx < tokens.len() && tokens[*idx].kind != TokenKind::RParen {
@@ -95,17 +118,29 @@ fn parse_call_expr(tokens: &[xin_lexer::Token], idx: &mut usize, name: String) -
     Ok(Expression::Call { callee: Box::new(Expression::Identifier(name)), args })
 }
 
-fn parse_number_expr(tokens: &[xin_lexer::Token], idx: &mut usize, n: String) -> Result<Expression, ParserError> {
+fn parse_number_expr(
+    _tokens: &[xin_lexer::Token],
+    idx: &mut usize,
+    n: String,
+) -> Result<Expression, ParserError> {
     *idx += 1;
     Ok(Expression::Literal(Literal::Number(n)))
 }
 
-fn parse_string_expr(tokens: &[xin_lexer::Token], idx: &mut usize, s: String) -> Result<Expression, ParserError> {
+fn parse_string_expr(
+    _tokens: &[xin_lexer::Token],
+    idx: &mut usize,
+    s: String,
+) -> Result<Expression, ParserError> {
     *idx += 1;
     Ok(Expression::Literal(Literal::String(s)))
 }
 
-fn parse_keyword_expr(tokens: &[xin_lexer::Token], idx: &mut usize, kw: &xin_lexer::Keyword) -> Result<Expression, ParserError> {
+fn parse_keyword_expr(
+    _tokens: &[xin_lexer::Token],
+    idx: &mut usize,
+    kw: &xin_lexer::Keyword,
+) -> Result<Expression, ParserError> {
     match kw {
         xin_lexer::Keyword::True => {
             *idx += 1;
@@ -119,7 +154,10 @@ fn parse_keyword_expr(tokens: &[xin_lexer::Token], idx: &mut usize, kw: &xin_lex
     }
 }
 
-fn parse_paren_expr(tokens: &[xin_lexer::Token], idx: &mut usize) -> Result<Expression, ParserError> {
+fn parse_paren_expr(
+    tokens: &[xin_lexer::Token],
+    idx: &mut usize,
+) -> Result<Expression, ParserError> {
     *idx += 1;
     let expr = parse_expr(tokens, idx)?;
     if *idx < tokens.len() && tokens[*idx].kind == TokenKind::RParen {

@@ -1,12 +1,17 @@
 //! Assignment statement parser.
 
+use super::super::expression::ParserError;
+use super::super::expression::parse_expression_from_tokens;
 use xin_ast::Statement;
 use xin_lexer::TokenKind;
-use super::super::expression::parse_expression_from_tokens;
-use super::super::expression::ParserError;
 
 /// Parse assignment statement.
-pub fn parse_assign_statement(tokens: &[xin_lexer::Token], mut idx: usize, statements: &mut Vec<Statement>, name: String) -> Result<usize, ParserError> {
+pub fn parse_assign_statement(
+    tokens: &[xin_lexer::Token],
+    mut idx: usize,
+    statements: &mut Vec<Statement>,
+    name: String,
+) -> Result<usize, ParserError> {
     idx += 1; // skip identifier (already have name)
     idx += 1; // skip '='
     let (value, new_idx) = parse_expression_from_tokens(tokens, idx)?;

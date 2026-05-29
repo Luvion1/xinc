@@ -2,8 +2,8 @@
 
 #[cfg(test)]
 mod tests {
-    use crate::{Analyzer, SymbolTable, Symbol};
-    use xin_ast::{Statement, Expression, Literal};
+    use crate::{Analyzer, Symbol, SymbolTable};
+    use xin_ast::{Expression, Literal, Statement};
 
     #[test]
     fn test_analyzer_let() {
@@ -51,10 +51,7 @@ mod tests {
     #[test]
     fn test_symbol_table() {
         let mut table = SymbolTable::new();
-        table.insert("x".to_string(), Symbol {
-            ty: Some("i32".to_string()),
-            mutable: true,
-        });
+        table.insert("x".to_string(), Symbol { ty: Some("i32".to_string()), mutable: true });
         assert!(table.lookup("x").is_some());
     }
 
@@ -67,10 +64,7 @@ mod tests {
     #[test]
     fn test_symbol_table_mutable() {
         let mut table = SymbolTable::new();
-        table.insert("x".to_string(), Symbol {
-            ty: Some("i32".to_string()),
-            mutable: true,
-        });
+        table.insert("x".to_string(), Symbol { ty: Some("i32".to_string()), mutable: true });
         assert!(table.lookup("x").unwrap().mutable);
     }
 
@@ -106,23 +100,19 @@ mod tests {
     #[test]
     fn test_analyzer_nested_block() {
         let mut analyzer = Analyzer::new();
-        let stmt = Statement::Block(vec![
-            Statement::Let {
-                name: "x".to_string(),
-                ty: None,
-                value: Expression::Literal(Literal::Number("1".to_string())),
-            },
-        ]);
+        let stmt = Statement::Block(vec![Statement::Let {
+            name: "x".to_string(),
+            ty: None,
+            value: Expression::Literal(Literal::Number("1".to_string())),
+        }]);
         analyzer.analyze(&stmt).unwrap();
     }
 
     #[test]
     fn test_analyzer_while() {
         let mut analyzer = Analyzer::new();
-        let stmt = Statement::While {
-            cond: Expression::Literal(Literal::Boolean(true)),
-            body: vec![],
-        };
+        let stmt =
+            Statement::While { cond: Expression::Literal(Literal::Boolean(true)), body: vec![] };
         analyzer.analyze(&stmt).unwrap();
     }
 
@@ -131,9 +121,7 @@ mod tests {
         let mut analyzer = Analyzer::new();
         let stmt = Statement::While {
             cond: Expression::Literal(Literal::Boolean(true)),
-            body: vec![
-                Statement::Expr(Expression::Literal(Literal::Number("1".to_string()))),
-            ],
+            body: vec![Statement::Expr(Expression::Literal(Literal::Number("1".to_string())))],
         };
         analyzer.analyze(&stmt).unwrap();
     }

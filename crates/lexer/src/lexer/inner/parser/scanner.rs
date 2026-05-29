@@ -148,7 +148,9 @@ impl Scanner {
     /// # Returns
     /// `Ok(())` if matched and consumed, `Err` otherwise
     pub fn expect(&mut self, expected: char) -> Result<(), crate::error::LexerError> {
-        if let Some(c) = self.current_char() && c == expected {
+        if let Some(c) = self.current_char()
+            && c == expected
+        {
             self.advance();
             return Ok(());
         }

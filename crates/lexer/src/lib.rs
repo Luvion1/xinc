@@ -8,15 +8,15 @@
 //! let tokens = tokenize("let x = 10;").unwrap();
 //! ```
 
+mod diagnostics;
+mod error;
 mod lexer;
 mod token;
-mod error;
-mod diagnostics;
 
+pub use diagnostics::*;
+pub use error::*;
 pub use lexer::*;
 pub use token::*;
-pub use error::*;
-pub use diagnostics::*;
 
 #[cfg(test)]
 mod tests;

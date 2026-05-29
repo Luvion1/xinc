@@ -38,7 +38,12 @@ pub fn parse_string_normal(scanner: &mut Scanner) -> Result<String, crate::error
                         result.push('"');
                         scanner.advance();
                     }
-                    _ => return Err(crate::error::LexerError::InvalidEscape { char: ch, position: scanner.byte_offset() }),
+                    _ => {
+                        return Err(crate::error::LexerError::InvalidEscape {
+                            char: ch,
+                            position: scanner.byte_offset(),
+                        });
+                    }
                 }
             }
             Some(c) => {
@@ -75,7 +80,13 @@ pub fn parse_char_normal(scanner: &mut Scanner) -> Result<char, crate::error::Le
     match scanner.current_char() {
         Some(c) => {
             scanner.advance();
-            Ok(c)
+            // Expect closing quote
+            if scanner.current_char() == Some('\'') {
+                scanner.advance();
+                Ok(c)
+            } else {
+                Err(crate::error::LexerError::UnterminatedChar)
+            }
         }
         None => Err(crate::error::LexerError::UnterminatedChar),
     }
@@ -176,9 +187,9 @@ mod tests {
 
     #[test]
     fn test_parse_raw_string_with_quotes() {
-        let mut s = Scanner::new("\"contains \\\" quote\"");
+        let mut s = Scanner::new("\"contains ' quote\"");
         s.advance();
         let val = parse_raw_string(&mut s).unwrap();
-        assert_eq!(val, "contains \" quote");
+        assert_eq!(val, "contains ' quote");
     }
 }

@@ -6,4 +6,4 @@ pub mod parser;
 #[cfg(test)]
 mod tests;
 
-pub use parser::{parse_expression, parse_expression_from_tokens, ParserError, match_operator};
+pub use parser::{ParserError, match_operator, parse_expression, parse_expression_from_tokens};

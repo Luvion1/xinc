@@ -178,20 +178,20 @@ impl Lexer {
 
     /// Dispatch normal token parsing (identifiers, numbers, operators/punctuation).
     fn parse_normal(&mut self, start: Position) -> Result<Option<Token>, LexerError> {
-        if let Some(c) = self.scanner.current_char() && is_identifier_start(c) {
+        if let Some(c) = self.scanner.current_char()
+            && is_identifier_start(c)
+        {
             let name = parse_identifier(&mut self.scanner)?;
             if let Some(kw) = from_str(&name) {
                 return Ok(Some(Token::new(TokenKind::Keyword(kw), start.line, start.column)));
             } else {
-                return Ok(Some(Token::new(
-                    TokenKind::Identifier(name),
-                    start.line,
-                    start.column,
-                )));
+                return Ok(Some(Token::new(TokenKind::Identifier(name), start.line, start.column)));
             }
         }
 
-        if let Some(c) = self.scanner.current_char() && c.is_ascii_digit() {
+        if let Some(c) = self.scanner.current_char()
+            && c.is_ascii_digit()
+        {
             let num = parse_number(&mut self.scanner)?;
             return Ok(Some(Token::new(TokenKind::Number(num), start.line, start.column)));
         }

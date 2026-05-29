@@ -109,10 +109,7 @@ mod tests {
     #[test]
     fn test_unary_op_neg() {
         let operand = Expression::Literal(Literal::Number("5".to_string()));
-        let expr = Expression::Unary {
-            op: UnaryOp::Neg,
-            operand: Box::new(operand),
-        };
+        let expr = Expression::Unary { op: UnaryOp::Neg, operand: Box::new(operand) };
         assert!(matches!(expr, Expression::Unary { op: UnaryOp::Neg, .. }));
     }
 
@@ -206,9 +203,22 @@ mod tests {
 
     #[test]
     fn test_binary_op_variants() {
-        let ops = [BinaryOp::Add, BinaryOp::Sub, BinaryOp::Mul, BinaryOp::Div,
-                    BinaryOp::Mod, BinaryOp::Eq, BinaryOp::Neq, BinaryOp::Lt, BinaryOp::Gt,
-                    BinaryOp::Shl, BinaryOp::Shr, BinaryOp::BitAnd, BinaryOp::BitOr, BinaryOp::BitXor];
+        let ops = [
+            BinaryOp::Add,
+            BinaryOp::Sub,
+            BinaryOp::Mul,
+            BinaryOp::Div,
+            BinaryOp::Mod,
+            BinaryOp::Eq,
+            BinaryOp::Neq,
+            BinaryOp::Lt,
+            BinaryOp::Gt,
+            BinaryOp::Shl,
+            BinaryOp::Shr,
+            BinaryOp::BitAnd,
+            BinaryOp::BitOr,
+            BinaryOp::BitXor,
+        ];
         for op in ops {
             assert_eq!(op, op);
         }

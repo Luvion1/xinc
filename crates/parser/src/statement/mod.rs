@@ -2,17 +2,17 @@
 //!
 //! Parses statements from tokens into AST nodes.
 
-pub mod let_stmt;
-pub mod if_stmt;
-pub mod while_stmt;
-pub mod fn_stmt;
 pub mod assign;
+pub mod fn_stmt;
+pub mod if_stmt;
+pub mod let_stmt;
 #[cfg(test)]
 mod tests;
+pub mod while_stmt;
 
+use super::expression::ParserError;
 use xin_ast::Statement;
 use xin_lexer::TokenKind;
-use super::expression::{parse_expression_from_tokens, ParserError};
 
 /// Parse a statement from source.
 pub fn parse_statement(source: &str) -> Result<Vec<Statement>, ParserError> {
@@ -22,7 +22,10 @@ pub fn parse_statement(source: &str) -> Result<Vec<Statement>, ParserError> {
 }
 
 /// Parse statements from tokens, returning new idx.
-pub fn parse_statements_from_tokens(tokens: &[xin_lexer::Token], mut idx: usize) -> Result<(Vec<Statement>, usize), ParserError> {
+pub fn parse_statements_from_tokens(
+    tokens: &[xin_lexer::Token],
+    mut idx: usize,
+) -> Result<(Vec<Statement>, usize), ParserError> {
     let mut statements = Vec::new();
 
     while idx < tokens.len() {
