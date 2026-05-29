@@ -111,7 +111,7 @@ mod tests {
     #[test]
     fn test_codegen_empty() {
         let code = generate(&[]).unwrap();
-        assert!(code.contains("Generated") || code.is_empty());
+        assert!(code.is_empty());
     }
 
     #[test]
@@ -174,5 +174,59 @@ mod tests {
         });
         let code = generate(&[stmt]).unwrap();
         assert!(code.contains("(8 >> 2)"));
+    }
+
+    #[test]
+    fn test_codegen_logical_and() {
+        let stmt = Statement::Expr(Expression::Binary {
+            left: Box::new(Expression::Literal(Literal::Boolean(true))),
+            op: BinaryOp::And,
+            right: Box::new(Expression::Literal(Literal::Boolean(false))),
+        });
+        let code = generate(&[stmt]).unwrap();
+        assert!(code.contains("(true && false)"));
+    }
+
+    #[test]
+    fn test_codegen_logical_or() {
+        let stmt = Statement::Expr(Expression::Binary {
+            left: Box::new(Expression::Literal(Literal::Boolean(true))),
+            op: BinaryOp::Or,
+            right: Box::new(Expression::Literal(Literal::Boolean(false))),
+        });
+        let code = generate(&[stmt]).unwrap();
+        assert!(code.contains("(true || false)"));
+    }
+
+    #[test]
+    fn test_codegen_bitxor() {
+        let stmt = Statement::Expr(Expression::Binary {
+            left: Box::new(Expression::Literal(Literal::Number("5".to_string()))),
+            op: BinaryOp::BitXor,
+            right: Box::new(Expression::Literal(Literal::Number("3".to_string()))),
+        });
+        let code = generate(&[stmt]).unwrap();
+        assert!(code.contains("(5 ^ 3)"));
+    }
+
+    #[test]
+    fn test_codegen_bitor() {
+        let stmt = Statement::Expr(Expression::Binary {
+            left: Box::new(Expression::Literal(Literal::Number("5".to_string()))),
+            op: BinaryOp::BitOr,
+            right: Box::new(Expression::Literal(Literal::Number("3".to_string()))),
+        });
+        let code = generate(&[stmt]).unwrap();
+        assert!(code.contains("(5 | 3)"));
+    }
+
+    #[test]
+    fn test_codegen_bitnot() {
+        let stmt = Statement::Expr(Expression::Unary {
+            op: UnaryOp::BitNot,
+            operand: Box::new(Expression::Literal(Literal::Number("5".to_string()))),
+        });
+        let code = generate(&[stmt]).unwrap();
+        assert!(code.contains("~5"));
     }
 }
