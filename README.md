@@ -7,8 +7,8 @@ A statically-typed compiled language with clean architecture and test-driven dev
 
 ## Features
 
-- **Multi-crate workspace**: Clean separation of lexer, parser, AST, semantic analysis
-- **216+ passing tests** across all crates
+- **Multi-crate workspace**: Clean separation of lexer, parser, AST, semantic analysis, codegen
+- **379+ passing tests** across all crates
 - **Clean Architecture**: Domain-driven design with strict layer boundaries
 - **Zero-panic production**: All errors use `Result<T, E>` with `thiserror`
 - **Edition 2024**: Modern Rust with latest language features
@@ -18,9 +18,11 @@ A statically-typed compiled language with clean architecture and test-driven dev
 | Crate | Description | Tests |
 |-------|-------------|-------|
 | `xin-lexer` | Lexical analysis with token recognition | 138 |
-| `xin-parser` | Recursive descent parser for statements/expressions | 40 |
-| `xin-ast` | AST node definitions | 16 |
-| `xin-semantic` | Type checking and name resolution | 18 |
+| `xin-parser` | Recursive descent parser for statements/expressions | 50 |
+| `xin-ast` | AST node definitions | 18 |
+| `xin-semantic` | Type checking and name resolution | 37 |
+| `xin-codegen` | JavaScript code generation | 6 |
+| Integration | End-to-end pipeline tests | 30 |
 
 ## Quick Start
 
