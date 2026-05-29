@@ -17,3 +17,6 @@ pub use lexer::*;
 pub use token::*;
 pub use error::*;
 pub use diagnostics::*;
+
+#[cfg(test)]
+mod tests;
