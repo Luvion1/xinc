@@ -32,3 +32,6 @@ xin-parser = { path = "crates/parser" }
 xin-semantic = { path = "crates/semantic" }
 tracing = "0.1"
 tracing-subscriber = "0.3"
+
+[dev-dependencies]
+xin-codegen = { path = "crates/codegen" }

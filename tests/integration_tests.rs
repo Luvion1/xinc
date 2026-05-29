@@ -77,4 +77,87 @@ mod tests {
         let stmts = parse_statement(source).unwrap();
         assert_eq!(stmts.len(), 1);
     }
+
+    #[test]
+    fn test_pipeline_bitwise_and() {
+        let source = "let z = a & b;";
+        let stmts = parse_statement(source).unwrap();
+        assert_eq!(stmts.len(), 1);
+    }
+
+    #[test]
+    fn test_pipeline_bitwise_or() {
+        let source = "let z = a | b;";
+        let stmts = parse_statement(source).unwrap();
+        assert_eq!(stmts.len(), 1);
+    }
+
+    #[test]
+    fn test_pipeline_bitwise_xor() {
+        let source = "let z = a ^ b;";
+        let stmts = parse_statement(source).unwrap();
+        assert_eq!(stmts.len(), 1);
+    }
+
+    #[test]
+    fn test_pipeline_shift_left() {
+        let source = "let z = 1 << 4;";
+        let stmts = parse_statement(source).unwrap();
+        assert_eq!(stmts.len(), 1);
+    }
+
+    #[test]
+    fn test_pipeline_shift_right() {
+        let source = "let z = 8 >> 2;";
+        let stmts = parse_statement(source).unwrap();
+        assert_eq!(stmts.len(), 1);
+    }
+
+    #[test]
+    fn test_pipeline_logical_and() {
+        let source = "let z = a && b;";
+        let stmts = parse_statement(source).unwrap();
+        assert_eq!(stmts.len(), 1);
+    }
+
+    #[test]
+    fn test_pipeline_logical_or() {
+        let source = "let z = a || b;";
+        let stmts = parse_statement(source).unwrap();
+        assert_eq!(stmts.len(), 1);
+    }
+
+    #[test]
+    fn test_pipeline_bitnot() {
+        let source = "let z = ~x;";
+        let stmts = parse_statement(source).unwrap();
+        assert_eq!(stmts.len(), 1);
+    }
+
+    #[test]
+    fn test_pipeline_codegen_binary() {
+        use xin_codegen::generate;
+        let source = "let x = 1 + 2;";
+        let stmts = parse_statement(source).unwrap();
+        let code = generate(&stmts).unwrap();
+        assert!(code.contains("(1 + 2)"));
+    }
+
+    #[test]
+    fn test_pipeline_codegen_bitwise() {
+        use xin_codegen::generate;
+        let source = "let x = a & b;";
+        let stmts = parse_statement(source).unwrap();
+        let code = generate(&stmts).unwrap();
+        assert!(code.contains("(a & b)"));
+    }
+
+    #[test]
+    fn test_pipeline_codegen_logical() {
+        use xin_codegen::generate;
+        let source = "let x = a && b;";
+        let stmts = parse_statement(source).unwrap();
+        let code = generate(&stmts).unwrap();
+        assert!(code.contains("(a && b)"));
+    }
 }

@@ -157,9 +157,22 @@ fn parse_keyword_expr(
 #[test]
 fn test_binary_op_variants() {
     let ops = [
-        BinaryOp::Add, BinaryOp::Sub, BinaryOp::Mul, BinaryOp::Div, BinaryOp::Mod, BinaryOp::Eq,
-        BinaryOp::Neq, BinaryOp::Lt, BinaryOp::Gt, BinaryOp::Shl, BinaryOp::Shr, BinaryOp::BitAnd,
-        BinaryOp::BitOr, BinaryOp::BitXor, BinaryOp::And, BinaryOp::Or,
+        BinaryOp::Add,
+        BinaryOp::Sub,
+        BinaryOp::Mul,
+        BinaryOp::Div,
+        BinaryOp::Mod,
+        BinaryOp::Eq,
+        BinaryOp::Neq,
+        BinaryOp::Lt,
+        BinaryOp::Gt,
+        BinaryOp::Shl,
+        BinaryOp::Shr,
+        BinaryOp::BitAnd,
+        BinaryOp::BitOr,
+        BinaryOp::BitXor,
+        BinaryOp::And,
+        BinaryOp::Or,
     ];
     for op in ops {
         assert_eq!(op, op);
