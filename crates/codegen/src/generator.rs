@@ -80,10 +80,13 @@ fn generate_expression(expr: &Expression) -> Result<String, CodegenError> {
             Ok(format!("{}{}", op_str, operand_code))
         }
         Expression::Call { callee, args } => {
-            let callee_code = generate_expression(callee)?;
+            let callee_str = match callee.as_ref() {
+                Expression::Identifier(name) => name.clone(),
+                _ => return Err(CodegenError::InvalidStatement),
+            };
             let args_code: Vec<String> =
                 args.iter().map(generate_expression).collect::<Result<Vec<_>, _>>()?;
-            Ok(format!("{}({})", callee_code, args_code.join(", ")))
+            Ok(format!("{}({})", callee_str, args_code.join(", ")))
         }
         Expression::Ternary { cond, then_expr, else_expr } => {
             let cond_code = generate_expression(cond)?;
