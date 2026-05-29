@@ -97,3 +97,88 @@ pub fn parse_char_raw(scanner: &mut Scanner) -> Result<char, crate::error::Lexer
         None => Err(crate::error::LexerError::UnterminatedChar),
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_string_empty() {
+        let mut s = Scanner::new("\"\"");
+        s.advance(); // skip opening quote
+        let val = parse_string_normal(&mut s).unwrap();
+        assert_eq!(val, "");
+    }
+
+    #[test]
+    fn test_parse_string_simple() {
+        let mut s = Scanner::new("\"hello\"");
+        s.advance();
+        let val = parse_string_normal(&mut s).unwrap();
+        assert_eq!(val, "hello");
+    }
+
+    #[test]
+    fn test_parse_string_with_newline_escape() {
+        let mut s = Scanner::new("\"a\\nb\"");
+        s.advance();
+        let val = parse_string_normal(&mut s).unwrap();
+        assert_eq!(val, "a\nb");
+    }
+
+    #[test]
+    fn test_parse_string_with_tab_escape() {
+        let mut s = Scanner::new("\"a\\tb\"");
+        s.advance();
+        let val = parse_string_normal(&mut s).unwrap();
+        assert_eq!(val, "a\tb");
+    }
+
+    #[test]
+    fn test_parse_string_with_carriage_return_escape() {
+        let mut s = Scanner::new("\"a\\rb\"");
+        s.advance();
+        let val = parse_string_normal(&mut s).unwrap();
+        assert_eq!(val, "a\rb");
+    }
+
+    #[test]
+    fn test_parse_string_with_backslash_escape() {
+        let mut s = Scanner::new("\"a\\\\b\"");
+        s.advance();
+        let val = parse_string_normal(&mut s).unwrap();
+        assert_eq!(val, "a\\b");
+    }
+
+    #[test]
+    fn test_parse_string_with_quote_escape() {
+        let mut s = Scanner::new("\"a\\\"b\"");
+        s.advance();
+        let val = parse_string_normal(&mut s).unwrap();
+        assert_eq!(val, "a\"b");
+    }
+
+    #[test]
+    fn test_parse_char_simple() {
+        let mut s = Scanner::new("'a'");
+        s.advance();
+        let val = parse_char_normal(&mut s).unwrap();
+        assert_eq!(val, 'a');
+    }
+
+    #[test]
+    fn test_parse_raw_string() {
+        let mut s = Scanner::new("\"hello\"");
+        s.advance();
+        let val = parse_raw_string(&mut s).unwrap();
+        assert_eq!(val, "hello");
+    }
+
+    #[test]
+    fn test_parse_raw_string_with_quotes() {
+        let mut s = Scanner::new("\"contains \\\" quote\"");
+        s.advance();
+        let val = parse_raw_string(&mut s).unwrap();
+        assert_eq!(val, "contains \" quote");
+    }
+}

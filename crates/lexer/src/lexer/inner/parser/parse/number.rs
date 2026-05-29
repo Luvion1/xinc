@@ -204,4 +204,32 @@ mod tests {
         let err = parse_number(&mut s).unwrap_err();
         assert!(matches!(err, LexerError::InvalidNumber { .. }));
     }
+
+    #[test]
+    fn test_invalid_binary_no_digits() {
+        let mut s = Scanner::new("0b");
+        let err = parse_number(&mut s).unwrap_err();
+        assert!(matches!(err, LexerError::InvalidNumber { .. }));
+    }
+
+    #[test]
+    fn test_invalid_octal_no_digits() {
+        let mut s = Scanner::new("0o");
+        let err = parse_number(&mut s).unwrap_err();
+        assert!(matches!(err, LexerError::InvalidNumber { .. }));
+    }
+
+    #[test]
+    fn test_binary_number() {
+        let mut s = Scanner::new("0b1010");
+        let val = parse_number(&mut s).unwrap();
+        assert_eq!(val, "0b1010");
+    }
+
+    #[test]
+    fn test_invalid_empty() {
+        let mut s = Scanner::new("");
+        let err = parse_number(&mut s).unwrap_err();
+        assert!(matches!(err, LexerError::InvalidNumber { .. }));
+    }
 }
