@@ -4,7 +4,7 @@
 
 use super::SemanticError;
 use crate::symbol::{Symbol, SymbolTable};
-use xin_ast::{Expression, Statement};
+use xin_ast::{BinaryOp, Expression, Literal, Statement, UnaryOp};
 
 /// Semantic analyzer.
 pub struct Analyzer {
@@ -82,13 +82,27 @@ impl Analyzer {
                     return Err(SemanticError::UndefinedVariable(name.clone()));
                 }
             }
-            Expression::Binary { left, right, .. } => {
+            Expression::Binary { left, right, op } => {
                 self.check_expr(left)?;
                 self.check_expr(right)?;
+                match op {
+                    BinaryOp::BitAnd | BinaryOp::BitOr | BinaryOp::BitXor => {
+                        self.check_integer_operand(left, "bitwise")?;
+                        self.check_integer_operand(right, "bitwise")?;
+                    }
+                    BinaryOp::Shl | BinaryOp::Shr => {
+                        self.check_integer_operand(left, "shift")?;
+                        self.check_integer_operand(right, "shift")?;
+                    }
+                    _ => {}
+                }
             }
             Expression::Literal(_) => {}
-            Expression::Unary { operand, .. } => {
+            Expression::Unary { operand, op } => {
                 self.check_expr(operand)?;
+                if *op == UnaryOp::BitNot {
+                    self.check_integer_operand(operand, "bitwise NOT")?;
+                }
             }
             Expression::Call { callee, args } => {
                 self.check_expr(callee)?;
@@ -103,6 +117,17 @@ impl Analyzer {
             }
         }
         Ok(())
+    }
+
+    fn check_integer_operand(&self, expr: &Expression, op: &str) -> Result<(), SemanticError> {
+        match expr {
+            Expression::Literal(Literal::Number(_)) => Ok(()),
+            Expression::Identifier(_) => Ok(()),
+            _ => Err(SemanticError::TypeError(format!(
+                "operand for {} operator must be integer",
+                op
+            ))),
+        }
     }
 }
 
@@ -261,5 +286,37 @@ mod tests {
     fn test_analyzer_new_type() {
         let analyzer = Analyzer::new();
         let _: *const SymbolTable = &analyzer.symbols;
+    }
+
+    #[test]
+    fn test_analyze_bitwise_ok() {
+        let mut analyzer = Analyzer::new();
+        let stmt = Statement::Expr(Expression::Binary {
+            left: Box::new(Expression::Literal(Literal::Number("1".to_string()))),
+            op: BinaryOp::BitAnd,
+            right: Box::new(Expression::Literal(Literal::Number("2".to_string()))),
+        });
+        assert!(analyzer.analyze(&stmt).is_ok());
+    }
+
+    #[test]
+    fn test_analyze_shift_ok() {
+        let mut analyzer = Analyzer::new();
+        let stmt = Statement::Expr(Expression::Binary {
+            left: Box::new(Expression::Literal(Literal::Number("1".to_string()))),
+            op: BinaryOp::Shl,
+            right: Box::new(Expression::Literal(Literal::Number("2".to_string()))),
+        });
+        assert!(analyzer.analyze(&stmt).is_ok());
+    }
+
+    #[test]
+    fn test_analyze_bitnot_ok() {
+        let mut analyzer = Analyzer::new();
+        let stmt = Statement::Expr(Expression::Unary {
+            op: UnaryOp::BitNot,
+            operand: Box::new(Expression::Literal(Literal::Number("1".to_string()))),
+        });
+        assert!(analyzer.analyze(&stmt).is_ok());
     }
 }

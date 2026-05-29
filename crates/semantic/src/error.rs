@@ -21,4 +21,8 @@ pub enum SemanticError {
     /// Invalid operation.
     #[error("Invalid operation: {0}")]
     InvalidOperation(String),
+
+    /// Type error.
+    #[error("Type error: {0}")]
+    TypeError(String),
 }
