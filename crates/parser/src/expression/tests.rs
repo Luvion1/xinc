@@ -76,6 +76,18 @@ fn test_parse_binary_or() {
 }
 
 #[test]
+fn test_parse_logical_and() {
+    let expr = parse_expression("a && b").unwrap();
+    assert!(matches!(expr, Expression::Binary { op: BinaryOp::And, .. }));
+}
+
+#[test]
+fn test_parse_logical_or() {
+    let expr = parse_expression("a || b").unwrap();
+    assert!(matches!(expr, Expression::Binary { op: BinaryOp::Or, .. }));
+}
+
+#[test]
 fn test_parse_binary_xor() {
     let expr = parse_expression("a ^ b").unwrap();
     assert!(matches!(expr, Expression::Binary { op: BinaryOp::BitXor, .. }));

@@ -64,6 +64,10 @@ pub enum BinaryOp {
     BitOr,
     /// Bitwise XOR.
     BitXor,
+    /// Logical AND.
+    And,
+    /// Logical OR.
+    Or,
 }
 
 /// Unary operator.

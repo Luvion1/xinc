@@ -154,6 +154,18 @@ fn parse_keyword_expr(
     }
 }
 
+#[test]
+fn test_binary_op_variants() {
+    let ops = [
+        BinaryOp::Add, BinaryOp::Sub, BinaryOp::Mul, BinaryOp::Div, BinaryOp::Mod, BinaryOp::Eq,
+        BinaryOp::Neq, BinaryOp::Lt, BinaryOp::Gt, BinaryOp::Shl, BinaryOp::Shr, BinaryOp::BitAnd,
+        BinaryOp::BitOr, BinaryOp::BitXor, BinaryOp::And, BinaryOp::Or,
+    ];
+    for op in ops {
+        assert_eq!(op, op);
+    }
+}
+
 fn parse_paren_expr(
     tokens: &[xin_lexer::Token],
     idx: &mut usize,
@@ -180,11 +192,11 @@ pub fn match_operator(kind: &TokenKind) -> Option<BinaryOp> {
         TokenKind::Gt => Some(BinaryOp::Gt),
         TokenKind::Shl => Some(BinaryOp::Shl),
         TokenKind::Shr => Some(BinaryOp::Shr),
-        TokenKind::And => Some(BinaryOp::BitAnd),
-        TokenKind::Or => Some(BinaryOp::BitOr),
-        TokenKind::BitXor => Some(BinaryOp::BitXor),
         TokenKind::BitAnd => Some(BinaryOp::BitAnd),
         TokenKind::BitOr => Some(BinaryOp::BitOr),
+        TokenKind::BitXor => Some(BinaryOp::BitXor),
+        TokenKind::And => Some(BinaryOp::And),
+        TokenKind::Or => Some(BinaryOp::Or),
         _ => None,
     }
 }

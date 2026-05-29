@@ -65,6 +65,8 @@ fn generate_expression(expr: &Expression) -> Result<String, CodegenError> {
                 BinaryOp::BitAnd => "&",
                 BinaryOp::BitOr => "|",
                 BinaryOp::BitXor => "^",
+                BinaryOp::And => "&&",
+                BinaryOp::Or => "||",
             };
             Ok(format!("({} {} {})", left_code, op_str, right_code))
         }
