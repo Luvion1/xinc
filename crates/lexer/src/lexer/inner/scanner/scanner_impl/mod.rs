@@ -1,4 +1,22 @@
-//! Character-level scanner for lexical analysis.
+//! Byte-cursor scanner used by every per-token parser.
+//!
+//! [`Scanner`] owns the source text and a current position. All public
+//! methods are non-mutating queries except [`Scanner::advance`], which
+//! moves the cursor one character (and updates line/column when crossing
+//! a newline).
+//!
+//! The scanner is a deliberately small primitive: it knows nothing about
+//! tokens or grammar. The lexer's [`crate::lexer::inner::scanner::Lexer`]
+//! holds a [`Scanner`] and dispatches to per-category parsers in
+//! [`crate::lexer::inner::scanner::parse`], which call back into the
+//! scanner to read characters.
+//!
+//! # Position tracking
+//!
+//! [`Scanner::position`] returns a [`Position`] built from the current
+//! line and column. Newlines bump the line counter and reset the column
+//! to 1; every other character advances the column by one. The scanner
+//! is UTF-8 aware: `advance` walks one Unicode scalar value, not one byte.
 
 #[cfg(test)]
 mod tests;
@@ -6,21 +24,25 @@ mod tests;
 use crate::diagnostics::Position;
 use crate::error::LexerError;
 
-/// Scanner reads source code character by character, tracking position.
+/// Byte cursor over the source text.
+///
+/// The scanner tracks the byte offset (for slicing into the source) and
+/// the (line, column) pair (for diagnostics). It is `Clone` so parsers
+/// can checkpoint positions cheaply.
 #[derive(Debug, Clone)]
 pub struct Scanner {
-    /// The complete source text
+    /// The complete source text.
     source: String,
-    /// Current byte offset into source
+    /// Current byte offset into source.
     byte_offset: usize,
-    /// Current line number (starting at 1)
+    /// Current line number (starting at 1).
     line: u32,
-    /// Current column number (starting at 1)
+    /// Current column number (starting at 1).
     column: u32,
 }
 
 impl Scanner {
-    /// Create a new scanner from source string.
+    /// Create a new scanner positioned at the start of `source`.
     pub fn new(source: &str) -> Self {
         Self { source: source.to_string(), byte_offset: 0, line: 1, column: 1 }
     }

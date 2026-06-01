@@ -1,6 +1,34 @@
-//! Semantic analysis.
+//! Semantic analyzer implementation.
 //!
-//! Performs type checking and name resolution.
+//! This module houses the [`Analyzer`] struct and its traversal logic. The
+//! analyzer is a single-pass visitor that walks a slice of statements in
+//! order, populating a [`SymbolTable`] and enforcing a small set of type
+//! rules along the way.
+//!
+//! # Pass structure
+//!
+//! [`Analyzer::analyze`] dispatches on the statement kind:
+//!
+//! | Statement | Action |
+//! |-----------|--------|
+//! | `Let`     | Insert binding with `mutable = true`, validate the initializer. |
+//! | `Fn`      | Insert binding with `mutable = false`, recurse into the body. |
+//! | `Expr`    | Recurse into the expression. |
+//! | `Return`  | Validate the optional value expression. |
+//! | `Block`   | Recurse into each statement. |
+//! | `If`      | Recurse into condition, then-branch, optional else. |
+//! | `While`   | Recurse into condition and body. |
+//! | `Assign`  | Require the target to already be in the symbol table, validate value. |
+//!
+//! Expressions are handled by [`Analyzer::check_expr`], which performs
+//! name resolution for identifiers and type-checks bitwise / shift
+//! operands through [`Analyzer::check_integer_operand`].
+//!
+//! # Scope
+//!
+//! The analyzer does not yet implement block scoping. A `let` inside a
+//! block is therefore visible for the rest of the program, including after
+//! the block ends. This is documented as a limitation in the parent module.
 
 mod tests;
 
@@ -9,12 +37,17 @@ use crate::symbol::{Symbol, SymbolTable};
 use xin_ast::{BinaryOp, Expression, Literal, Statement, UnaryOp};
 
 /// Semantic analyzer.
+///
+/// Holds a [`SymbolTable`] of every binding seen so far. Reuse a single
+/// instance for a complete program; the analyzer mutates the table as it
+/// walks. Use [`Analyzer::new`] to construct one with an empty table.
 pub struct Analyzer {
+    /// Symbol table populated as statements are analyzed.
     pub symbols: SymbolTable,
 }
 
 impl Analyzer {
-    /// Create new analyzer.
+    /// Create a new analyzer with an empty symbol table.
     pub fn new() -> Self {
         Self { symbols: SymbolTable::new() }
     }

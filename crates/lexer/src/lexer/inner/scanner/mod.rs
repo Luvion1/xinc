@@ -1,4 +1,28 @@
-//! Lexical analyzer implementation.
+//! Lexical analyzer (scanner + dispatcher).
+//!
+//! This module is the public face of the lexer's inner state machine. It
+//! re-exports the [`Scanner`] cursor from the private
+//! [`scanner_impl`] module and groups the per-token parsers
+//! ([`parse`], [`fstring`]) that the dispatcher routes to.
+//!
+//! # Public surface
+//!
+//! - [`Scanner`] — the byte-cursor used by every per-token parser.
+//!   The implementation lives in [`scanner_impl`] (private to keep the
+//!   `scanner::scanner` module-path ambiguity out of the public API).
+//! - [`parse`] — the per-category parsers. Each submodule (ident, number,
+//!   string, operator, punctuation, fstring) handles one leading-character
+//!   family. The dispatcher in this file's `Lexer` chooses between them.
+//! - [`fstring`] — f-string helpers. Re-exported separately because the
+//!   active-f-string state is a property of the [`Lexer`], not the
+//!   stateless per-token parsers.
+//!
+//! # Module naming
+//!
+//! The child module [`scanner_impl`] is intentionally named differently
+//! from the parent `scanner` folder. Without this split, paths like
+//! `scanner::scanner::Scanner` would be the only way to reach the type,
+//! triggering `clippy::module_inception`.
 
 pub mod fstring;
 pub mod parse;
