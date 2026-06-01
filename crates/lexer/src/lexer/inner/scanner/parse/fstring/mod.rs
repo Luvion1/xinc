@@ -1,22 +1,44 @@
-//! f-string interpolation parsing.
+//! f-string parsing.
 //!
-//! Handles the literal parts of f-strings, which are the text between
-//! expression blocks (`{...}`). This parser reads characters until a `{`
-//! or the closing `"` of the f-string, processing escape sequences just
-//! like a normal string.
+//! Two helpers cooperate to turn an f-string literal into a sequence of
+//! [`TokenKind::String`] (the literal fragments) and [`TokenKind::Identifier`]
+//! (the expression placeholders):
+//!
+//! - [`parse_fstring_fragment`] — reads the literal text between `{` braces
+//!   or the closing `"`, processing escapes. Stops at the first unescaped
+//!   `{` or `"`.
+//! - [`parse_fstring_placeholder`] — reads a single `{ ... }` block
+//!   including brace nesting, returning the inner source text. The lexer
+//!   hands the inner text back to the parser later (one re-tokenization
+//!   per placeholder) so that real expressions — not just identifiers —
+//!   are valid inside `{ ... }`.
+//!
+//! # State ownership
+//!
+//! The active-f-string state (brace depth, the accumulator) is held
+//! by the outer [`crate::lexer::inner::scanner::Lexer`], **not** by the
+//! scanner cursor. The functions in this module are pure parsers: they
+//! take a `&mut Scanner` and read from the source bytes. The lexer
+//! stitches the fragments together at a higher layer.
+//!
+//! # Errors
+//!
+//! Returns [`crate::error::LexerError::UnterminatedString`] if the
+//! f-string is never closed; the lexer converts this into a regular
+//! error before the parser ever sees the placeholder.
 
 use super::super::Scanner;
 use crate::error::LexerError;
 
-/// Parse an f-string fragment (the literal text part).
+/// Parse the literal text fragment between `{` placeholders in an
+/// f-string.
 ///
-/// Starts after the opening `"` of an f-string. Reads characters until
-/// encountering a `{` (which begins an embedded expression) or a `"` (which
-/// ends the f-string). Escape sequences are processed using the same rules
-/// as normal strings.
-///
-/// The scanner is left positioned at the delimiter (`{` or `"`) after the
-/// fragment is consumed. The caller must handle the delimiter.
+/// Reads from the current scanner position, processing escape
+/// sequences identically to a regular string. Stops when it sees
+/// either an unescaped `{` (start of a placeholder) or `"` (end of the
+/// f-string). The scanner is left positioned **on** the delimiter; the
+/// caller decides whether the delimiter is a `{` placeholder or a `"`
+/// terminator.
 pub fn parse_fstring_fragment(scanner: &mut Scanner) -> Result<String, LexerError> {
     let mut result = String::new();
     while let Some(c) = scanner.current_char() {
