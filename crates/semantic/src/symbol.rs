@@ -4,6 +4,8 @@
 
 use std::collections::HashMap;
 
+use xin_ast::Type;
+
 /// Symbol table for name resolution.
 #[derive(Debug, Default)]
 pub struct SymbolTable {
@@ -32,7 +34,7 @@ impl SymbolTable {
 #[derive(Debug, Clone)]
 pub struct Symbol {
     /// Symbol type.
-    pub ty: Option<String>,
+    pub ty: Option<Type>,
     /// Is mutable.
     pub mutable: bool,
 }

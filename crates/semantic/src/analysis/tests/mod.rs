@@ -6,12 +6,12 @@ mod expression;
 mod statement;
 
 use crate::{Analyzer, Symbol, SymbolTable};
-use xin_ast::{Expression, Literal, Statement};
+use xin_ast::{Expression, Literal, Statement, Type, BuiltinType};
 
 #[test]
 fn test_symbol_table() {
     let mut table = SymbolTable::new();
-    table.insert("x".to_string(), Symbol { ty: Some("i32".to_string()), mutable: true });
+    table.insert("x".to_string(), Symbol { ty: Some(Type::Builtin(BuiltinType::I32)), mutable: true });
     assert!(table.lookup("x").is_some());
 }
 
@@ -24,7 +24,7 @@ fn test_symbol_table_not_found() {
 #[test]
 fn test_symbol_table_mutable() {
     let mut table = SymbolTable::new();
-    table.insert("x".to_string(), Symbol { ty: Some("i32".to_string()), mutable: true });
+    table.insert("x".to_string(), Symbol { ty: Some(Type::Builtin(BuiltinType::I32)), mutable: true });
     assert!(table.lookup("x").unwrap().mutable);
 }
 

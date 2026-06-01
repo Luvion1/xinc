@@ -32,10 +32,10 @@ pub fn generate_statement(stmt: &Statement) -> Result<String, CodegenError> {
     Ok(match stmt {
         Statement::Let { name, value, .. } => {
             let val = generate_expression(value)?;
-            format!("let {name} = {val};")
+            format!("let {name} = {val};\n")
         }
         Statement::Expr(e) => {
-            format!("{};", generate_expression(e)?)
+            format!("{};\n", generate_expression(e)?)
         }
         Statement::If { cond, then, r#else } => {
             let cond = generate_expression(cond)?;
@@ -44,27 +44,30 @@ pub fn generate_statement(stmt: &Statement) -> Result<String, CodegenError> {
                 Some(e) => format!(" else {}", generate_statement(e)?),
                 None => String::new(),
             };
-            format!("if ({cond}) {then_body}{else_body}")
+            format!("if ({cond}) {then_body}{else_body}\n")
         }
         Statement::While { cond, body } => {
             let cond = generate_expression(cond)?;
             let body = block(body)?;
-            format!("while ({cond}) {body}")
+            format!("while ({cond}) {body}\n")
         }
         Statement::Return(e) => match e {
-            Some(expr) => format!("return {};", generate_expression(expr)?),
-            None => "return;".to_string(),
+            Some(expr) => format!("return {};\n", generate_expression(expr)?),
+            None => "return;\n".to_string(),
         },
-        Statement::Block(stmts) => block(stmts)?,
+        Statement::Block(stmts) => {
+            let body = block(stmts)?;
+            format!("{body}\n")
+        }
         Statement::Fn { name, params, body, ret_ty } => {
             let params = params.iter().map(|p| p.name.clone()).collect::<Vec<_>>().join(", ");
             let ret = ret_ty.as_ref().map_or(String::new(), |t| format!(": {}", type_str(t)));
             let body = block(body)?;
-            format!("fn {name}({params}){ret} {body}")
+            format!("fn {name}({params}){ret} {body}\n")
         }
         Statement::Assign { target, value } => {
             let val = generate_expression(value)?;
-            format!("{target} = {val};")
+            format!("{target} = {val};\n")
         }
     })
 }

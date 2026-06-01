@@ -55,17 +55,17 @@ impl Analyzer {
     /// Analyze a statement.
     pub fn analyze(&mut self, stmt: &Statement) -> Result<(), SemanticError> {
         match stmt {
-            Statement::Let { name, ty, value } => {
-                self.symbols.insert(
-                    name.clone(),
-                    Symbol { ty: ty.clone().map(|t| format!("{t:?}")), mutable: true },
-                );
-                self.check_expr(value)?;
-            }
+             Statement::Let { name, ty, value } => {
+                 self.symbols.insert(
+                     name.clone(),
+                     Symbol { ty: ty.clone(), mutable: true },
+                 );
+                 self.check_expr(value)?;
+             }
             Statement::Fn { name, params: _, body, ret_ty } => {
                 self.symbols.insert(
                     name.clone(),
-                    Symbol { ty: ret_ty.as_ref().map(|t| format!("{t:?}")), mutable: false },
+                    Symbol { ty: ret_ty.clone(), mutable: false },
                 );
                 for stmt in body {
                     self.analyze(stmt)?;
