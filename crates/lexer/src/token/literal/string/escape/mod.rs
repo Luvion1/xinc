@@ -10,7 +10,7 @@ use validator::validate_escape;
 ///
 /// Represents `\` followed by a character that has
 /// special meaning in strings.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum EscapeSequence {
     /// Newline: \n
     Newline,
@@ -37,7 +37,7 @@ pub enum EscapeSequence {
 /// * `c` - Character following the backslash
 ///
 /// # Returns
-/// Matching EscapeSequence enum variant
+/// Matching `EscapeSequence` enum variant
 pub fn parse_escape(c: char) -> EscapeSequence {
     match c {
         'n' => EscapeSequence::Newline,
@@ -66,8 +66,7 @@ pub fn escape_to_char(escape: &EscapeSequence) -> char {
         EscapeSequence::CarriageReturn => '\r',
         EscapeSequence::Backslash => '\\',
         EscapeSequence::Quote => '"',
-        EscapeSequence::Unicode(c) => *c,
-        EscapeSequence::Unknown(c) => *c,
+        EscapeSequence::Unicode(c) | EscapeSequence::Unknown(c) => *c,
     }
 }
 

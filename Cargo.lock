@@ -873,6 +873,7 @@ dependencies = [
  "tracing-subscriber",
  "xin-ast",
  "xin-codegen",
+ "xin-driver",
  "xin-lexer",
  "xin-parser",
  "xin-semantic",
@@ -889,6 +890,16 @@ dependencies = [
  "thiserror",
  "tracing",
  "xin-ast",
+]
+
+[[package]]
+name = "xin-driver"
+version = "0.1.0"
+dependencies = [
+ "thiserror",
+ "tracing",
+ "xin-ast",
+ "xin-codegen",
  "xin-lexer",
  "xin-parser",
  "xin-semantic",
@@ -922,7 +933,6 @@ version = "0.1.0"
 dependencies = [
  "thiserror",
  "xin-ast",
- "xin-lexer",
 ]
 
 [[package]]

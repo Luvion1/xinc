@@ -3,24 +3,34 @@
 //! All expression types in the AST.
 
 /// Expression enum.
-#[derive(Debug, Clone, PartialEq)]
+///
+/// Every value-producing construct in the Xin language is represented as
+/// an `Expression` node. Expressions are composable: a binary expression
+/// holds two sub-expressions, a function call holds a callee expression
+/// plus an argument list, and so on.
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Expression {
     /// Literal value.
     Literal(Literal),
     /// Identifier reference.
     Identifier(String),
     /// Binary operation.
-    Binary { left: Box<Expression>, op: BinaryOp, right: Box<Expression> },
+    Binary { left: Box<Self>, op: BinaryOp, right: Box<Self> },
     /// Unary operation.
-    Unary { op: UnaryOp, operand: Box<Expression> },
+    Unary { op: UnaryOp, operand: Box<Self> },
     /// Function call.
-    Call { callee: Box<Expression>, args: Vec<Expression> },
-    /// Ternary conditional: cond ? then : else
-    Ternary { cond: Box<Expression>, then_expr: Box<Expression>, else_expr: Box<Expression> },
+    Call { callee: Box<Self>, args: Vec<Self> },
+    /// Ternary conditional: `cond ? then : else`.
+    Ternary { cond: Box<Self>, then_expr: Box<Self>, else_expr: Box<Self> },
 }
 
 /// Literal value.
-#[derive(Debug, Clone, PartialEq, Default)]
+///
+/// Numeric literals are kept as `String` to preserve the source form
+/// (e.g. leading zeros, arbitrary-precision hints, separator underscores)
+/// without committing to a concrete numeric type at parse time. The
+/// semantic analysis stage is responsible for type conversion.
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub enum Literal {
     /// String literal.
     String(String),
@@ -34,7 +44,7 @@ pub enum Literal {
 }
 
 /// Binary operator.
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum BinaryOp {
     /// Addition.
     Add,
@@ -71,7 +81,7 @@ pub enum BinaryOp {
 }
 
 /// Unary operator.
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum UnaryOp {
     /// Negation.
     Neg,
@@ -82,167 +92,4 @@ pub enum UnaryOp {
 }
 
 #[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_literal_default_is_null() {
-        let lit = Literal::default();
-        assert_eq!(lit, Literal::Null);
-    }
-
-    #[test]
-    fn test_expression_clone() {
-        let expr = Expression::Literal(Literal::Number("42".to_string()));
-        let cloned = expr.clone();
-        assert_eq!(expr, cloned);
-    }
-
-    #[test]
-    fn test_binary_op_eq() {
-        let left = Expression::Literal(Literal::Number("1".to_string()));
-        let right = Expression::Literal(Literal::Number("2".to_string()));
-        let expr = Expression::Binary {
-            left: Box::new(left.clone()),
-            op: BinaryOp::Add,
-            right: Box::new(right.clone()),
-        };
-        assert!(matches!(expr, Expression::Binary { op: BinaryOp::Add, .. }));
-    }
-
-    #[test]
-    fn test_unary_op_neg() {
-        let operand = Expression::Literal(Literal::Number("5".to_string()));
-        let expr = Expression::Unary { op: UnaryOp::Neg, operand: Box::new(operand) };
-        assert!(matches!(expr, Expression::Unary { op: UnaryOp::Neg, .. }));
-    }
-
-    #[test]
-    fn test_call_expression() {
-        let callee = Expression::Identifier("print".to_string());
-        let expr = Expression::Call {
-            callee: Box::new(callee),
-            args: vec![Expression::Literal(Literal::String("hi".to_string()))],
-        };
-        assert!(matches!(expr, Expression::Call { .. }));
-    }
-
-    #[test]
-    fn test_string_empty() {
-        let lit = Literal::String("".to_string());
-        assert_eq!(lit, Literal::String("".to_string()));
-    }
-
-    #[test]
-    fn test_string_with_escapes() {
-        let lit = Literal::String("hello\\nworld".to_string());
-        assert_eq!(lit, Literal::String("hello\\nworld".to_string()));
-    }
-
-    #[test]
-    fn test_string_unicode() {
-        let lit = Literal::String("日本語".to_string());
-        assert_eq!(lit, Literal::String("日本語".to_string()));
-    }
-
-    #[test]
-    fn test_string_line_continuation() {
-        let lit = Literal::String("a\\\\b".to_string());
-        assert_eq!(lit, Literal::String("a\\\\b".to_string()));
-    }
-
-    #[test]
-    fn test_string_tab() {
-        let lit = Literal::String("a\\tb".to_string());
-        assert_eq!(lit, Literal::String("a\\tb".to_string()));
-    }
-
-    #[test]
-    fn test_string_carriage_return() {
-        let lit = Literal::String("a\\rb".to_string());
-        assert_eq!(lit, Literal::String("a\\rb".to_string()));
-    }
-
-    #[test]
-    fn test_string_null() {
-        let lit = Literal::String("a\\0b".to_string());
-        assert_eq!(lit, Literal::String("a\\0b".to_string()));
-    }
-
-    #[test]
-    fn test_string_single_quote() {
-        let lit = Literal::String("a\\'b".to_string());
-        assert_eq!(lit, Literal::String("a\\'b".to_string()));
-    }
-
-    #[test]
-    fn test_string_double_quote() {
-        let lit = Literal::String("a\\\"b".to_string());
-        assert_eq!(lit, Literal::String("a\\\"b".to_string()));
-    }
-
-    #[test]
-    fn test_string_backslash() {
-        let lit = Literal::String("a\\\\b".to_string());
-        assert_eq!(lit, Literal::String("a\\\\b".to_string()));
-    }
-
-    #[test]
-    fn test_string_octal() {
-        let lit = Literal::String("a\\123b".to_string());
-        assert_eq!(lit, Literal::String("a\\123b".to_string()));
-    }
-
-    #[test]
-    fn test_string_hex() {
-        let lit = Literal::String("a\\xab".to_string());
-        assert_eq!(lit, Literal::String("a\\xab".to_string()));
-    }
-
-    #[test]
-    fn test_literal_boolean_true() {
-        let lit = Literal::Boolean(true);
-        assert_eq!(lit, Literal::Boolean(true));
-    }
-
-    #[test]
-    fn test_binary_op_variants() {
-        let ops = [
-            BinaryOp::Add,
-            BinaryOp::Sub,
-            BinaryOp::Mul,
-            BinaryOp::Div,
-            BinaryOp::Mod,
-            BinaryOp::Eq,
-            BinaryOp::Neq,
-            BinaryOp::Lt,
-            BinaryOp::Gt,
-            BinaryOp::Shl,
-            BinaryOp::Shr,
-            BinaryOp::BitAnd,
-            BinaryOp::BitOr,
-            BinaryOp::BitXor,
-        ];
-        for op in ops {
-            assert_eq!(op, op);
-        }
-    }
-
-    #[test]
-    fn test_ternary_expression() {
-        let expr = Expression::Ternary {
-            cond: Box::new(Expression::Literal(Literal::Boolean(true))),
-            then_expr: Box::new(Expression::Literal(Literal::Number("1".to_string()))),
-            else_expr: Box::new(Expression::Literal(Literal::Number("2".to_string()))),
-        };
-        assert!(matches!(expr, Expression::Ternary { .. }));
-    }
-
-    #[test]
-    fn test_unary_op_variants() {
-        let ops = [UnaryOp::Neg, UnaryOp::Not, UnaryOp::BitNot];
-        for op in ops {
-            assert_eq!(op, op);
-        }
-    }
-}
+mod tests;

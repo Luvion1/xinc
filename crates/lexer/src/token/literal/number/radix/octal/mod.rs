@@ -15,7 +15,7 @@ pub fn parse(input: &str) -> Option<u64> {
     // Process each character as octal digit
     for ch in input.chars() {
         // Convert char to digit in base 8
-        let digit = ch.to_digit(8)? as u64;
+        let digit = u64::from(ch.to_digit(8)?);
 
         // Multiply existing by 8 and add digit
         result = result * 8 + digit;

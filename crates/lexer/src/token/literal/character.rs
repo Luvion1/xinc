@@ -4,7 +4,7 @@
 /// A character literal value.
 ///
 /// Contains the character and whether it's raw.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CharLiteral {
     /// The Unicode character value
     pub value: char,
@@ -19,16 +19,16 @@ impl CharLiteral {
     /// * `value` - The character value
     ///
     /// # Returns
-    /// A new CharLiteral instance (not raw)
+    /// A new `CharLiteral` instance (not raw)
     pub fn new(value: char) -> Self {
-        CharLiteral { value, is_raw: false }
+        Self { value, is_raw: false }
     }
 
     /// Create a raw character literal.
     ///
     /// Raw literals don't process escape sequences.
     pub fn new_raw(value: char) -> Self {
-        CharLiteral { value, is_raw: true }
+        Self { value, is_raw: true }
     }
 
     /// Get the character value.

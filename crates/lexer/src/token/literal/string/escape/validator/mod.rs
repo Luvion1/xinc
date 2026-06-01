@@ -6,7 +6,7 @@
 //! - Unicode escapes (\u{...}) are syntactically well-formed
 //! - Unknown escapes are rejected (e.g., \x is invalid)
 //!
-//! Unicode validation additionally checks code point range (<= 0x10FFFF) and
+//! Unicode validation additionally checks code point range (<= 0x0010_FFFF) and
 //! excludes surrogate halves (0xD800-0xDFFF) which are invalid in Rust strings.
 //!
 //! This module is used during lexing when processing string literals. Invalid
@@ -17,23 +17,22 @@ pub mod unicode;
 
 use super::super::EscapeSequence;
 
-/// Validate an escape sequence.
 pub fn validate_escape(escape: &EscapeSequence) -> bool {
-    match escape {
-        super::EscapeSequence::Newline => true,
-        super::EscapeSequence::Tab => true,
-        super::EscapeSequence::CarriageReturn => true,
-        super::EscapeSequence::Backslash => true,
-        super::EscapeSequence::Quote => true,
-        super::EscapeSequence::Unicode(_) => true,
-        super::EscapeSequence::Unknown(_) => false,
-    }
+    matches!(
+        escape,
+        EscapeSequence::Newline
+        | EscapeSequence::Tab
+        | EscapeSequence::CarriageReturn
+        | EscapeSequence::Backslash
+        | EscapeSequence::Quote
+        | EscapeSequence::Unicode(_)
+    )
 }
 
 /// Validate a Unicode character.
 pub fn validate_unicode_char(c: char) -> bool {
     let code = c as u32;
-    (0x0000..=0x10FFFF).contains(&code) && !(0xD800..=0xDFFF).contains(&code)
+    (0x0000..=0x0010_FFFF).contains(&code) && !(0xD800..=0xDFFF).contains(&code)
 }
 
 #[cfg(test)]

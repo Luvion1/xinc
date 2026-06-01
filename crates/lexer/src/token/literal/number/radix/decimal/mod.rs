@@ -15,7 +15,7 @@ pub fn parse(input: &str) -> Option<u64> {
     // Process each character
     for ch in input.chars() {
         // Get decimal digit value
-        let digit = ch.to_digit(10)? as u64;
+        let digit = u64::from(ch.to_digit(10)?);
 
         // Multiply accumulator by 10 and add digit
         result = result * 10 + digit;

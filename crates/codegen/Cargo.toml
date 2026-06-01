@@ -7,8 +7,5 @@ authors.workspace = true
 
 [dependencies]
 xin-ast = { path = "../ast" }
-xin-lexer = { path = "../lexer" }
-xin-parser = { path = "../parser" }
-xin-semantic = { path = "../semantic" }
 thiserror = "1.0"
 tracing = "0.1"

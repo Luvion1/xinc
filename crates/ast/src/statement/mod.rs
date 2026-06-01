@@ -3,28 +3,28 @@
 //! All statement types in the AST.
 
 /// Statement enum.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Statement {
     /// Variable declaration.
     Let { name: String, ty: Option<Type>, value: super::Expression },
     /// Function declaration.
-    Fn { name: String, params: Vec<Param>, body: Vec<Statement>, ret_ty: Option<Type> },
+    Fn { name: String, params: Vec<Param>, body: Vec<Self>, ret_ty: Option<Type> },
     /// Expression statement.
     Expr(super::Expression),
     /// Return statement.
     Return(Option<super::Expression>),
     /// Block statement.
-    Block(Vec<Statement>),
+    Block(Vec<Self>),
     /// If statement.
-    If { cond: super::Expression, then: Vec<Statement>, r#else: Option<Box<Statement>> },
+    If { cond: super::Expression, then: Vec<Self>, r#else: Option<Box<Self>> },
     /// While loop statement.
-    While { cond: super::Expression, body: Vec<Statement> },
+    While { cond: super::Expression, body: Vec<Self> },
     /// Assignment statement.
     Assign { target: String, value: super::Expression },
 }
 
 /// Function parameter.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Param {
     /// Parameter name.
     pub name: String,
@@ -33,7 +33,7 @@ pub struct Param {
 }
 
 /// Type reference.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Type {
     /// Built-in type.
     Builtin(BuiltinType),
@@ -42,7 +42,7 @@ pub enum Type {
 }
 
 /// Built-in types.
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum BuiltinType {
     /// 32-bit signed integer.
     I32,
@@ -58,7 +58,11 @@ pub enum BuiltinType {
     Str,
 }
 
-/// Type alias.
+/// Type alias kept for backward compatibility.
+///
+/// Prefer using [`Type`] directly in new code. This alias exists so that
+/// external consumers referring to the historical `TypeRef` name continue
+/// to compile.
 pub type TypeRef = Type;
 
 #[cfg(test)]

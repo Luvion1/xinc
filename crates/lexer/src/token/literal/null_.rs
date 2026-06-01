@@ -14,12 +14,12 @@ impl NullLiteral {
     ///
     /// There is only one null value.
     pub fn new() -> Self {
-        NullLiteral
+        Self
     }
 
     /// Check if a value is null.
     ///
-    /// Always returns true for NullLiteral.
+    /// Always returns true for `NullLiteral`.
     pub fn is_null(&self) -> bool {
         true
     }
@@ -28,8 +28,8 @@ impl NullLiteral {
     ///
     /// # Returns
     /// Some(NullLiteral) if input is "null", None otherwise
-    pub fn parse(input: &str) -> Option<NullLiteral> {
-        if input == "null" { Some(NullLiteral) } else { None }
+    pub fn parse(input: &str) -> Option<Self> {
+        if input == "null" { Some(Self) } else { None }
     }
 }
 

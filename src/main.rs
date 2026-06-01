@@ -1,6 +1,6 @@
 //! Xin language compiler CLI.
 //!
-//! Compiles Xin source code to bytecode.
+//! Compiles Xin source code via the driver pipeline.
 
 use clap::Parser;
 use tracing::{error, info};
@@ -53,61 +53,66 @@ fn main() {
 
     info!("Compiling {}...", args.input);
 
-    let tokens = match xin_lexer::tokenize(&source) {
-        Ok(t) => t,
-        Err(e) => {
-            error!("Lexical error: {}", e);
-            std::process::exit(1);
-        }
-    };
-
-    info!("Generated {} tokens", tokens.len());
-
     if args.lex {
-        info!("Stopping after lexing");
-        if let Some(output) = args.output {
-            std::fs::write(&output, format!("{:#?}", tokens)).unwrap();
+        match xin_driver::tokenize(&source) {
+            Ok(tokens) => {
+                info!("Generated {} tokens", tokens.len());
+                if let Some(output) = args.output {
+                    if let Err(e) = std::fs::write(&output, format!("{:#?}", tokens)) {
+                        error!("Failed to write output file: {}", e);
+                        std::process::exit(1);
+                    }
+                }
+            }
+            Err(e) => {
+                error!("Lexical error: {}", e);
+                std::process::exit(1);
+            }
         }
         return;
     }
 
-    let _stmts = match xin_parser::parse_statement(&source) {
-        Ok(s) => s,
+    let stmts = match xin_driver::parse(&source) {
+        Ok(s) => {
+            info!("Parsed {} statements", s.len());
+            s
+        }
         Err(e) => {
             error!("Parse error: {}", e);
             std::process::exit(1);
         }
     };
 
-    info!("Parsed {} statements", _stmts.len());
-
     if args.parse {
-        info!("Stopping after parsing");
         if let Some(output) = args.output {
-            std::fs::write(&output, format!("{:#?}", _stmts)).unwrap();
+            if let Err(e) = std::fs::write(&output, format!("{:#?}", stmts)) {
+                error!("Failed to write output file: {}", e);
+                std::process::exit(1);
+            }
         }
         return;
     }
 
-    // Semantic analysis
-    let mut _analyzer = xin_semantic::Analyzer::new();
-    for stmt in &_stmts {
-        if let Err(e) = _analyzer.analyze(stmt) {
-            error!("Semantic error: {}", e);
+    // Full compilation via driver
+    match xin_driver::compile(&source) {
+        Ok(result) => {
+            if args.semantic {
+                info!("Semantic analysis passed");
+                return;
+            }
+            if let Some(output) = args.output {
+                if let Err(e) = std::fs::write(&output, result) {
+                    error!("Failed to write output file: {}", e);
+                    std::process::exit(1);
+                }
+                info!("Output written to {}", output);
+            } else {
+                println!("{}", result);
+            }
+        }
+        Err(e) => {
+            error!("Compilation failed: {}", e);
             std::process::exit(1);
         }
-    }
-
-    info!("Semantic analysis passed");
-
-    if args.semantic {
-        info!("Stopping after semantic analysis");
-        return;
-    }
-
-    if let Some(output) = args.output {
-        info!("Output written to {}", output);
-    } else {
-        println!("Compilation successful");
     }
 }

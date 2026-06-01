@@ -7,7 +7,7 @@
 pub mod radix;
 
 /// A numeric literal value.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum NumberLiteral {
     /// An integer
     Integer(IntegerLiteral),
@@ -16,7 +16,7 @@ pub enum NumberLiteral {
 }
 
 /// Integer literal with radix.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct IntegerLiteral {
     pub value: String,
     pub radix: u8,
@@ -24,7 +24,7 @@ pub struct IntegerLiteral {
 }
 
 /// Float literal.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct FloatLiteral {
     pub value: String,
     pub has_decimal: bool,

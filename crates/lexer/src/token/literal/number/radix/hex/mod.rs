@@ -30,7 +30,7 @@ pub fn parse(input: &str) -> Option<u64> {
     // Process each character as hex digit
     for ch in input.chars() {
         // Convert char to hex digit (0-15)
-        let digit = ch.to_digit(16)? as u64;
+        let digit = u64::from(ch.to_digit(16)?);
 
         // Multiply by 16 and add digit
         result = result * 16 + digit;

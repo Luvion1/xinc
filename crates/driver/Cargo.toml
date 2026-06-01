@@ -1,0 +1,16 @@
+[package]
+name = "xin-driver"
+version = "0.1.0"
+edition = "2024"
+description = "Xin compiler pipeline driver"
+authors = ["Xin Team"]
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+xin-lexer = { path = "../lexer" }
+xin-parser = { path = "../parser" }
+xin-semantic = { path = "../semantic" }
+xin-codegen = { path = "../codegen" }
+xin-ast = { path = "../ast" }
+thiserror = "1.0"
+tracing = "0.1"

@@ -8,5 +8,4 @@ license = "MIT OR Apache-2.0"
 
 [dependencies]
 xin-ast = { path = "../ast" }
-xin-lexer = { path = "../lexer" }
 thiserror = "1.0"

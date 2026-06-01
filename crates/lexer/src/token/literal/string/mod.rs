@@ -13,7 +13,7 @@ use escape::EscapeSequence;
 /// A string literal value.
 ///
 /// Contains the raw string content and metadata.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct StringLiteral {
     /// The string content.
     pub value: String,
@@ -24,12 +24,12 @@ pub struct StringLiteral {
 impl StringLiteral {
     /// Create a new string literal.
     pub fn new(value: String) -> Self {
-        StringLiteral { value, is_raw: false }
+        Self { value, is_raw: false }
     }
 
     /// Create a raw string literal.
     pub fn new_raw(value: String) -> Self {
-        StringLiteral { value, is_raw: true }
+        Self { value, is_raw: true }
     }
 
     /// Get the length of the string.

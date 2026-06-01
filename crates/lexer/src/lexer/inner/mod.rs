@@ -1,2 +1,2 @@
-pub mod parser;
-pub use parser::Lexer;
+pub mod scanner;
+pub use scanner::Lexer;

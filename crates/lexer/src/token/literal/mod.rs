@@ -34,7 +34,7 @@ pub use number::NumberLiteral;
 pub use string::StringLiteral;
 
 /// All literal value types.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Literal {
     /// A string literal
     String(StringLiteral),

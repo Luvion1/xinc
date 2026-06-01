@@ -1,16 +1,21 @@
-//! Expression parser implementation.
+//! Expression parsing with precedence climbing.
+//!
+//! Entry points: `parse_expression` (str → AST) and
+//! `parse_expression_from_tokens` (token slice → AST). Delegates to
+//! `atom::parse_atom` for atomic (non-recursive) forms.
 
-use xin_ast::{BinaryOp, Expression, Literal, UnaryOp};
-use xin_lexer::{LexerError, TokenKind, tokenize};
+use xin_ast::{Expression, BinaryOp};
+use xin_lexer::{TokenKind, tokenize};
+use super::error::ParserError;
 
-/// Parse an expression from source.
+use super::atom::parse_atom;
+
+/// Parse an expression from source string.
 pub fn parse_expression(source: &str) -> Result<Expression, ParserError> {
     let tokens = tokenize(source)?;
-    if tokens.is_empty() {
-        return Err(ParserError::EmptyInput);
-    }
-
-    parse_expr(&tokens, &mut 0)
+    if tokens.is_empty() { return Err(ParserError::EmptyInput); }
+    let mut idx = 0;
+    parse_expr(&tokens, &mut idx, 0)
 }
 
 /// Parse expression from pre-tokenized tokens.
@@ -18,180 +23,66 @@ pub fn parse_expression_from_tokens(
     tokens: &[xin_lexer::Token],
     mut idx: usize,
 ) -> Result<(Expression, usize), ParserError> {
-    let result = parse_expr(tokens, &mut idx)?;
+    let result = parse_expr(tokens, &mut idx, 0)?;
     Ok((result, idx))
 }
 
-/// Recursive expression parsing with operator precedence.
-pub fn parse_expr(tokens: &[xin_lexer::Token], idx: &mut usize) -> Result<Expression, ParserError> {
-    let left = parse_atom(tokens, idx)?;
+/// Precedence-climbing expression parser (Pratt-style).
+///
+/// Parses left-associative binary operators with correct precedence:
+/// higher-precedence operators (e.g. `*`) bind tighter than lower ones (e.g. `+`).
+/// The `min_prec` parameter controls the minimum precedence level to accept,
+/// enabling recursive descent through precedence tiers.
+///
+/// # Precedence levels
+/// | Level | Operators |
+/// |-------|-----------|
+/// | 3     | `\|\|`    |
+/// | 4     | `&&`      |
+/// | 5     | `\|`      |
+/// | 6     | `^`       |
+/// | 7     | `&`       |
+/// | 8     | `==` `!=` |
+/// | 9     | `<` `>`   |
+/// | 11    | `<<` `>>` |
+/// | 12    | `+` `-`   |
+/// | 13    | `*` `/` `%` |
+pub fn parse_expr(
+    tokens: &[xin_lexer::Token],
+    idx: &mut usize,
+    min_prec: u8,
+) -> Result<Expression, ParserError> {
+    let mut left = parse_atom(tokens, idx)?;
 
-    #[allow(clippy::collapsible_if)]
-    if *idx < tokens.len() {
-        if let Some(op) = match_operator(&tokens[*idx].kind) {
-            *idx += 1;
-            let right = parse_atom(tokens, idx)?;
-            return Ok(Expression::Binary { left: Box::new(left), op, right: Box::new(right) });
-        }
+    while *idx < tokens.len() {
+        let Some(op) = match_operator(&tokens[*idx].kind) else { break };
+        let prec = binary_precedence(op);
+        if prec < min_prec { break; }
+        *idx += 1;
+        let right = parse_expr(tokens, idx, prec + 1)?;
+        left = Expression::Binary { left: Box::new(left), op, right: Box::new(right) };
     }
 
     Ok(left)
 }
 
-/// Parse atomic expressions.
-pub fn parse_atom(tokens: &[xin_lexer::Token], idx: &mut usize) -> Result<Expression, ParserError> {
-    if *idx >= tokens.len() {
-        return Err(ParserError::UnexpectedEnd);
-    }
-
-    match &tokens[*idx].kind {
-        TokenKind::Not => parse_unary_not(tokens, idx),
-        TokenKind::BitNot => parse_unary_bitnot(tokens, idx),
-        TokenKind::Minus => parse_unary_neg(tokens, idx),
-        TokenKind::Identifier(name) => parse_identifier_expr(tokens, idx, name.clone()),
-        TokenKind::Number(n) => parse_number_expr(tokens, idx, n.clone()),
-        TokenKind::String(s) => parse_string_expr(tokens, idx, s.clone()),
-        TokenKind::Keyword(kw) => parse_keyword_expr(tokens, idx, kw),
-        TokenKind::LParen => parse_paren_expr(tokens, idx),
-        _ => Err(ParserError::ExpectedExpression),
+/// Precedence level for each binary operator (higher = tighter binding).
+fn binary_precedence(op: BinaryOp) -> u8 {
+    match op {
+        BinaryOp::Or => 3,
+        BinaryOp::And => 4,
+        BinaryOp::BitOr => 5,
+        BinaryOp::BitXor => 6,
+        BinaryOp::BitAnd => 7,
+        BinaryOp::Eq | BinaryOp::Neq => 8,
+        BinaryOp::Lt | BinaryOp::Gt => 9,
+        BinaryOp::Shl | BinaryOp::Shr => 11,
+        BinaryOp::Add | BinaryOp::Sub => 12,
+        BinaryOp::Mul | BinaryOp::Div | BinaryOp::Mod => 13,
     }
 }
 
-fn parse_unary_not(
-    tokens: &[xin_lexer::Token],
-    idx: &mut usize,
-) -> Result<Expression, ParserError> {
-    *idx += 1;
-    let operand = parse_atom(tokens, idx)?;
-    Ok(Expression::Unary { op: UnaryOp::Not, operand: Box::new(operand) })
-}
-
-fn parse_unary_bitnot(
-    tokens: &[xin_lexer::Token],
-    idx: &mut usize,
-) -> Result<Expression, ParserError> {
-    *idx += 1;
-    let operand = parse_atom(tokens, idx)?;
-    Ok(Expression::Unary { op: UnaryOp::BitNot, operand: Box::new(operand) })
-}
-
-fn parse_unary_neg(
-    tokens: &[xin_lexer::Token],
-    idx: &mut usize,
-) -> Result<Expression, ParserError> {
-    *idx += 1;
-    let operand = parse_atom(tokens, idx)?;
-    Ok(Expression::Unary { op: UnaryOp::Neg, operand: Box::new(operand) })
-}
-
-fn parse_identifier_expr(
-    tokens: &[xin_lexer::Token],
-    idx: &mut usize,
-    name: String,
-) -> Result<Expression, ParserError> {
-    *idx += 1;
-    if *idx < tokens.len() && tokens[*idx].kind == TokenKind::LParen {
-        parse_call_expr(tokens, idx, name)
-    } else {
-        Ok(Expression::Identifier(name))
-    }
-}
-
-fn parse_call_expr(
-    tokens: &[xin_lexer::Token],
-    idx: &mut usize,
-    name: String,
-) -> Result<Expression, ParserError> {
-    *idx += 1;
-    let mut args = Vec::new();
-    while *idx < tokens.len() && tokens[*idx].kind != TokenKind::RParen {
-        let (arg, new_idx) = parse_expression_from_tokens(tokens, *idx)?;
-        args.push(arg);
-        *idx = new_idx;
-        if *idx < tokens.len() && tokens[*idx].kind == TokenKind::Comma {
-            *idx += 1;
-        }
-    }
-    if *idx < tokens.len() && tokens[*idx].kind == TokenKind::RParen {
-        *idx += 1;
-    }
-    Ok(Expression::Call { callee: Box::new(Expression::Identifier(name)), args })
-}
-
-fn parse_number_expr(
-    _tokens: &[xin_lexer::Token],
-    idx: &mut usize,
-    n: String,
-) -> Result<Expression, ParserError> {
-    *idx += 1;
-    Ok(Expression::Literal(Literal::Number(n)))
-}
-
-fn parse_string_expr(
-    _tokens: &[xin_lexer::Token],
-    idx: &mut usize,
-    s: String,
-) -> Result<Expression, ParserError> {
-    *idx += 1;
-    Ok(Expression::Literal(Literal::String(s)))
-}
-
-fn parse_keyword_expr(
-    _tokens: &[xin_lexer::Token],
-    idx: &mut usize,
-    kw: &xin_lexer::Keyword,
-) -> Result<Expression, ParserError> {
-    match kw {
-        xin_lexer::Keyword::True => {
-            *idx += 1;
-            Ok(Expression::Literal(Literal::Boolean(true)))
-        }
-        xin_lexer::Keyword::False => {
-            *idx += 1;
-            Ok(Expression::Literal(Literal::Boolean(false)))
-        }
-        _ => Err(ParserError::ExpectedExpression),
-    }
-}
-
-#[test]
-fn test_binary_op_variants() {
-    let ops = [
-        BinaryOp::Add,
-        BinaryOp::Sub,
-        BinaryOp::Mul,
-        BinaryOp::Div,
-        BinaryOp::Mod,
-        BinaryOp::Eq,
-        BinaryOp::Neq,
-        BinaryOp::Lt,
-        BinaryOp::Gt,
-        BinaryOp::Shl,
-        BinaryOp::Shr,
-        BinaryOp::BitAnd,
-        BinaryOp::BitOr,
-        BinaryOp::BitXor,
-        BinaryOp::And,
-        BinaryOp::Or,
-    ];
-    for op in ops {
-        assert_eq!(op, op);
-    }
-}
-
-fn parse_paren_expr(
-    tokens: &[xin_lexer::Token],
-    idx: &mut usize,
-) -> Result<Expression, ParserError> {
-    *idx += 1;
-    let expr = parse_expr(tokens, idx)?;
-    if *idx < tokens.len() && tokens[*idx].kind == TokenKind::RParen {
-        *idx += 1;
-    }
-    Ok(expr)
-}
-
-/// Match token to binary operator.
+/// Match token kind to binary operator.
 pub fn match_operator(kind: &TokenKind) -> Option<BinaryOp> {
     match kind {
         TokenKind::Plus => Some(BinaryOp::Add),
@@ -212,35 +103,4 @@ pub fn match_operator(kind: &TokenKind) -> Option<BinaryOp> {
         TokenKind::Or => Some(BinaryOp::Or),
         _ => None,
     }
-}
-
-/// Parser error types.
-#[derive(Debug, thiserror::Error)]
-pub enum ParserError {
-    #[error("Lexer error: {0}")]
-    Lexer(#[from] LexerError),
-
-    #[error("Empty input")]
-    EmptyInput,
-
-    #[error("Expected expression")]
-    ExpectedExpression,
-
-    #[error("Unexpected end of input")]
-    UnexpectedEnd,
-
-    #[error("Expected identifier")]
-    ExpectedIdentifier,
-
-    #[error("Expected '='")]
-    ExpectedAssignment,
-
-    #[error("Expected ';'")]
-    ExpectedSemicolon,
-
-    #[error("Invalid type")]
-    InvalidType,
-
-    #[error("Expected '{{'")]
-    ExpectedLBrace,
 }

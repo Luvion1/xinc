@@ -3,12 +3,10 @@
 //! Parses statements from tokens into AST nodes.
 
 pub mod assign;
-pub mod fn_stmt;
-pub mod if_stmt;
-pub mod let_stmt;
+pub mod declaration;
+pub mod flow;
 #[cfg(test)]
 mod tests;
-pub mod while_stmt;
 
 use super::expression::ParserError;
 use xin_ast::Statement;
@@ -49,13 +47,13 @@ pub fn parse_statements_from_tokens(
         }
 
         if tokens[idx].kind == TokenKind::Keyword(xin_lexer::Keyword::Let) {
-            idx = let_stmt::parse_let_statement(tokens, idx, &mut statements)?;
+            idx = declaration::let_stmt::parse_let_statement(tokens, idx, &mut statements)?;
         } else if tokens[idx].kind == TokenKind::Keyword(xin_lexer::Keyword::Fn) {
-            idx = fn_stmt::parse_fn_statement(tokens, idx, &mut statements)?;
+            idx = declaration::fn_stmt::parse_fn_statement(tokens, idx, &mut statements)?;
         } else if tokens[idx].kind == TokenKind::Keyword(xin_lexer::Keyword::If) {
-            idx = if_stmt::parse_if_statement(tokens, idx, &mut statements)?;
+            idx = flow::if_stmt::parse_if_statement(tokens, idx, &mut statements)?;
         } else if tokens[idx].kind == TokenKind::Keyword(xin_lexer::Keyword::While) {
-            idx = while_stmt::parse_while_statement(tokens, idx, &mut statements)?;
+            idx = flow::while_stmt::parse_while_statement(tokens, idx, &mut statements)?;
         } else if let TokenKind::Identifier(name) = &tokens[idx].kind {
             let name = name.clone();
             let next_idx = idx + 1;

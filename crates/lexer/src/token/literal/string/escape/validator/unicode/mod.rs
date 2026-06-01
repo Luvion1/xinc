@@ -10,7 +10,7 @@ use normalization::NormalizationForm;
 ///
 /// Valid range: U+0000..=U+10FFFF excluding surrogates.
 pub fn is_valid_scalar(code: u32) -> bool {
-    (0x0000..=0x10FFFF).contains(&code) && !(0xD800..=0xDFFF).contains(&code)
+    (0x0000..=0x0010_FFFF).contains(&code) && !(0xD800..=0xDFFF).contains(&code)
 }
 
 /// Check if a char is a valid Unicode scalar.

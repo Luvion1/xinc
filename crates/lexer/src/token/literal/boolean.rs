@@ -18,10 +18,7 @@ impl BoolLiteral {
     /// # Returns
     /// Rust bool corresponding to this literal
     pub fn value(self) -> bool {
-        match self {
-            BoolLiteral::True => true,
-            BoolLiteral::False => false,
-        }
+        matches!(self, Self::True)
     }
 
     /// Parse a boolean from a string.
@@ -31,10 +28,10 @@ impl BoolLiteral {
     ///
     /// # Returns
     /// Some(BoolLiteral) if valid, None otherwise
-    pub fn parse(input: &str) -> Option<BoolLiteral> {
+    pub fn parse(input: &str) -> Option<Self> {
         match input {
-            "true" => Some(BoolLiteral::True),
-            "false" => Some(BoolLiteral::False),
+            "true" => Some(Self::True),
+            "false" => Some(Self::False),
             _ => None,
         }
     }

@@ -4,7 +4,7 @@
 /// Identifier token.
 ///
 /// Represents a user-defined name in the source code.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Identifier {
     /// The identifier name as string
     pub name: String,
@@ -21,7 +21,7 @@ impl Identifier {
     /// # Returns
     /// New Identifier instance (no escapes by default)
     pub fn new(name: String) -> Self {
-        Identifier { name, has_escapes: false }
+        Self { name, has_escapes: false }
     }
 
     /// Get the identifier name.

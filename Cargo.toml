@@ -5,6 +5,7 @@ members = [
     "crates/ast",
     "crates/semantic",
     "crates/codegen",
+    "crates/driver",
 ]
 
 [workspace.package]
@@ -26,12 +27,13 @@ path = "src/main.rs"
 
 [dependencies]
 clap = { version = "4.0", features = ["derive"] }
-xin-ast = { path = "crates/ast" }
-xin-lexer = { path = "crates/lexer" }
-xin-parser = { path = "crates/parser" }
-xin-semantic = { path = "crates/semantic" }
+xin-driver = { path = "crates/driver" }
 tracing = "0.1"
 tracing-subscriber = "0.3"
 
 [dev-dependencies]
+xin-ast = { path = "crates/ast" }
+xin-lexer = { path = "crates/lexer" }
+xin-parser = { path = "crates/parser" }
+xin-semantic = { path = "crates/semantic" }
 xin-codegen = { path = "crates/codegen" }

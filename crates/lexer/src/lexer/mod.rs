@@ -14,7 +14,7 @@ pub use crate::token::TokenKind;
 
 // Internal modules
 pub mod inner;
-pub use inner::parser::Lexer;
+pub use inner::scanner::Lexer;
 
 /// Tokenize source code.
 ///
