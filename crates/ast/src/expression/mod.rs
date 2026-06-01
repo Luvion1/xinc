@@ -95,5 +95,77 @@ pub enum UnaryOp {
     BitNot,
 }
 
+use std::fmt;
+
+impl fmt::Display for Literal {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Literal::String(s) => write!(f, "\"{}\"", s),
+            Literal::Number(n) => write!(f, "{}", n),
+            Literal::Boolean(b) => write!(f, "{}", b),
+            Literal::Null => write!(f, "null"),
+        }
+    }
+}
+
+impl fmt::Display for Expression {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Expression::Literal(lit) => write!(f, "{lit}"),
+            Expression::Identifier(name) => write!(f, "{name}"),
+            Expression::Binary { left, op, right } => write!(f, "({} {} {})", &**left, op, &**right),
+            Expression::Unary { op, operand } => match op {
+                UnaryOp::Neg => write!(f, "-{operand}"),
+                UnaryOp::Not => write!(f, "!{operand}"),
+                UnaryOp::BitNot => write!(f, "~{operand}"),
+            },
+            Expression::Call { callee, args } => {
+                let args_str = args.iter().map(|a| a.to_string()).collect::<Vec<_>>().join(", ");
+                write!(f, "{callee}({args_str})")
+            }
+            Expression::Ternary { cond, then_expr, else_expr } => {
+                write!(f, "{} ? {} : {}", cond, then_expr, else_expr)
+            }
+        }
+    }
+}
+
+impl fmt::Display for BinaryOp {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let s = match self {
+            BinaryOp::Add => "+",
+            BinaryOp::Sub => "-",
+            BinaryOp::Mul => "*",
+            BinaryOp::Div => "/",
+            BinaryOp::Mod => "%",
+            BinaryOp::Eq => "==",
+            BinaryOp::Neq => "!=",
+            BinaryOp::Lt => "<",
+            BinaryOp::Le => "<=",
+            BinaryOp::Gt => ">",
+            BinaryOp::Ge => ">=",
+            BinaryOp::Shl => "<<",
+            BinaryOp::Shr => ">>",
+            BinaryOp::BitAnd => "&",
+            BinaryOp::BitOr => "|",
+            BinaryOp::BitXor => "^",
+            BinaryOp::And => "&&",
+            BinaryOp::Or => "||",
+        };
+        write!(f, "{s}")
+    }
+}
+
+impl fmt::Display for UnaryOp {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let s = match self {
+            UnaryOp::Neg => "-",
+            UnaryOp::Not => "!",
+            UnaryOp::BitNot => "~",
+        };
+        write!(f, "{s}")
+    }
+}
+
 #[cfg(test)]
 mod tests;
