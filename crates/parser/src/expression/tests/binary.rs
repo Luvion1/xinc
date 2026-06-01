@@ -78,8 +78,9 @@ fn test_precedence_paren_overrides() {
 fn test_precedence_mul_chain() {
     let expr = parse_expression("2 * 3 * 4").unwrap();
     let (left, right) = assert_binary(&expr, BinaryOp::Mul);
-    assert!(matches!(left, Expression::Literal(Literal::Number(n)) if n == "2"));
-    assert_binary(left, BinaryOp::Mul);
+    let (l1, r1) = assert_binary(left, BinaryOp::Mul);
+    assert!(matches!(l1, Expression::Literal(Literal::Number(n)) if n == "2"));
+    assert!(matches!(r1, Expression::Literal(Literal::Number(n)) if n == "3"));
     assert!(matches!(right, Expression::Literal(Literal::Number(n)) if n == "4"));
 }
 
@@ -87,8 +88,10 @@ fn test_precedence_mul_chain() {
 fn test_precedence_mixed_depth() {
     let expr = parse_expression("a + b * c - d / e").unwrap();
     let (left, right) = assert_binary(&expr, BinaryOp::Sub);
-    assert!(matches!(left, Expression::Identifier(name) if name == "a"));
-    assert!(matches!(right, Expression::Identifier(name) if name == "d"));
+    let (ll, _) = assert_binary(left, BinaryOp::Add);
+    assert!(matches!(ll, Expression::Identifier(name) if name == "a"));
+    let (rl, _) = assert_binary(right, BinaryOp::Div);
+    assert!(matches!(rl, Expression::Identifier(name) if name == "d"));
 }
 
 #[test]
