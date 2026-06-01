@@ -18,7 +18,9 @@ pub enum MirBinaryOp {
     IEq,
     INe,
     ILt,
+    ILe,
     IGt,
+    IGe,
     /// Bitwise ops.
     And,
     Or,

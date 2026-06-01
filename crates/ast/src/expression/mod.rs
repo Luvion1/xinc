@@ -62,8 +62,12 @@ pub enum BinaryOp {
     Neq,
     /// Less than.
     Lt,
+    /// Less than or equal.
+    Le,
     /// Greater than.
     Gt,
+    /// Greater than or equal.
+    Ge,
     /// Left shift.
     Shl,
     /// Right shift.

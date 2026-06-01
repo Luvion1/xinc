@@ -21,8 +21,12 @@ pub enum HirBinaryOp {
     Neq,
     /// Less than.
     Lt,
+    /// Less than or equal.
+    Le,
     /// Greater than.
     Gt,
+    /// Greater than or equal.
+    Ge,
     /// Bitwise AND.
     BitAnd,
     /// Bitwise OR.
@@ -50,7 +54,9 @@ pub fn binary_op_to_hir(op: &BinaryOp) -> HirBinaryOp {
         BinaryOp::Eq => HirBinaryOp::Eq,
         BinaryOp::Neq => HirBinaryOp::Neq,
         BinaryOp::Lt => HirBinaryOp::Lt,
+        BinaryOp::Le => HirBinaryOp::Le,
         BinaryOp::Gt => HirBinaryOp::Gt,
+        BinaryOp::Ge => HirBinaryOp::Ge,
         BinaryOp::BitAnd => HirBinaryOp::BitAnd,
         BinaryOp::BitOr => HirBinaryOp::BitOr,
         BinaryOp::BitXor => HirBinaryOp::BitXor,

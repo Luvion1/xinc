@@ -47,6 +47,14 @@ pub enum LirOp {
     Shl,
     /// Arithmetic shift right.
     Sar,
+    /// Signed less than.
+    Slt,
+    /// Signed less or equal.
+    Sle,
+    /// Signed greater than.
+    Sgt,
+    /// Signed greater or equal.
+    Sge,
 }
 
 /// Physical register.
@@ -105,6 +113,8 @@ fn lower_instr(instr: &Instr, lir: &mut LirFunction) {
                 MirBinaryOp::Xor => LirOp::Xor,
                 MirBinaryOp::Shl => LirOp::Shl,
                 MirBinaryOp::Ashr => LirOp::Sar,
+                MirBinaryOp::ILe => LirOp::Sle,
+                MirBinaryOp::IGe => LirOp::Sge,
                 _ => LirOp::Add,
             };
             lir.instrs.push(LirInstr::BinOp3 {

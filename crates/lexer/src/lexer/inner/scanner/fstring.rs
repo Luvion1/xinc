@@ -1,4 +1,26 @@
-//! f-string token handling for Lexer.
+//! f-string continuation handling for the [`Lexer`].
+//!
+//! The f-string parser is split into three pieces:
+//!
+//! - [`super::parse::fstring::parse_fstring_fragment`] — the stateless
+//!   fragment reader.
+//! - [`super::Lexer::handle_fstring_start`] — the entry point that
+//!   consumes the `f` and `"` opener and pushes the lexer into
+//!   "active f-string" mode.
+//! - The methods in this file — the **active f-string state machine**:
+//!   each call to [`Lexer::handle_fstring`] emits one of three token
+//!   kinds (literal fragment, identifier placeholder, or close) and
+//!   transitions the state.
+//!
+//! # State
+//!
+//! The state lives on the [`Lexer`] struct:
+//! - `fstring_active: bool` — whether we are inside an f-string.
+//! - `fstring_brace_nesting: usize` — depth of `{` braces within an
+//!   f-string placeholder; `0` means we are between placeholders.
+//!
+//! The methods in this file mutate both. Outside of an f-string, the
+//! `handle_fstring_*` methods are not called.
 
 use super::super::Lexer;
 use super::parse::fstring::parse_fstring_fragment;
@@ -7,6 +29,16 @@ use crate::error::LexerError;
 use crate::token::{Token, TokenKind};
 
 impl Lexer {
+    /// Dispatch one step of the active f-string state machine.
+    ///
+    /// Called from [`super::Lexer::next_token`] when `fstring_active`
+    /// is true. The behavior depends on `fstring_brace_nesting`:
+    ///
+    /// - `> 0` — we are inside a `{ ... }` placeholder; the next
+    ///   token is the inner expression, lexed as ordinary source.
+    /// - `0` — we are between placeholders; the next token is either
+    ///   a literal fragment (until the next `{` or closing `"`) or a
+    ///   terminator.
     #[allow(dead_code)]
     pub(super) fn handle_fstring(&mut self, start: Position) -> Result<Option<Token>, LexerError> {
         if self.fstring_brace_nesting > 0 {

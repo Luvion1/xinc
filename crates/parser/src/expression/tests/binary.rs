@@ -41,9 +41,9 @@ fn test_precedence_add_over_eq() {
 fn test_left_associative_add() {
     let expr = parse_expression("1 + 2 + 3").unwrap();
     let (left, right) = assert_binary(&expr, BinaryOp::Add);
-    assert!(matches!(left, Expression::Literal(Literal::Number(n)) if n == "1"));
-    let (left2, _) = assert_binary(left, BinaryOp::Add);
-    assert!(matches!(left2, Expression::Literal(Literal::Number(n)) if n == "1"));
+    let (l1, r1) = assert_binary(left, BinaryOp::Add);
+    assert!(matches!(l1, Expression::Literal(Literal::Number(n)) if n == "1"));
+    assert!(matches!(r1, Expression::Literal(Literal::Number(n)) if n == "2"));
     assert!(matches!(right, Expression::Literal(Literal::Number(n)) if n == "3"));
 }
 
@@ -51,8 +51,9 @@ fn test_left_associative_add() {
 fn test_left_associative_sub() {
     let expr = parse_expression("10 - 5 - 2").unwrap();
     let (left, right) = assert_binary(&expr, BinaryOp::Sub);
-    assert!(matches!(left, Expression::Literal(Literal::Number(n)) if n == "10"));
-    assert_binary(left, BinaryOp::Sub);
+    let (l1, r1) = assert_binary(left, BinaryOp::Sub);
+    assert!(matches!(l1, Expression::Literal(Literal::Number(n)) if n == "10"));
+    assert!(matches!(r1, Expression::Literal(Literal::Number(n)) if n == "5"));
     assert!(matches!(right, Expression::Literal(Literal::Number(n)) if n == "2"));
 }
 
@@ -172,6 +173,36 @@ fn test_parse_comparison_lt() {
 fn test_parse_comparison_gt() {
     let expr = parse_expression("a > b").unwrap();
     assert!(matches!(expr, Expression::Binary { op: BinaryOp::Gt, .. }));
+}
+
+#[test]
+fn test_parse_comparison_le() {
+    let expr = parse_expression("a <= b").unwrap();
+    assert!(matches!(expr, Expression::Binary { op: BinaryOp::Le, .. }));
+}
+
+#[test]
+fn test_parse_comparison_ge() {
+    let expr = parse_expression("a >= b").unwrap();
+    assert!(matches!(expr, Expression::Binary { op: BinaryOp::Ge, .. }));
+}
+
+#[test]
+fn test_precedence_le_lt() {
+    let expr = parse_expression("a + b <= c").unwrap();
+    let (left, right) = assert_binary(&expr, BinaryOp::Le);
+    let (_rl, _rr) = assert_binary(left, BinaryOp::Add);
+    assert!(matches!(right, Expression::Identifier(n) if n == "c"));
+}
+
+#[test]
+fn test_precedence_ge_gt() {
+    let expr = parse_expression("a * b >= c").unwrap();
+    let (left, right) = assert_binary(&expr, BinaryOp::Ge);
+    let (rl, rr) = assert_binary(left, BinaryOp::Mul);
+    assert!(matches!(right, Expression::Identifier(n) if n == "c"));
+    assert!(matches!(rl, Expression::Identifier(n) if n == "a"));
+    assert!(matches!(rr, Expression::Identifier(n) if n == "b"));
 }
 
 #[test]
