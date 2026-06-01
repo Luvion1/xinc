@@ -1,9 +1,32 @@
 //! Expression code generation.
+//!
+//! Walks an [`Expression`] and produces a parenthesized infix
+//! representation. The output is plain source text — no SSA, no
+//! registers, no instruction set. The IR layers ([`crate::hir`],
+//! [`crate::mir`], [`crate::lir`]) are independent and consume the
+//! HIR, not the [`Expression`] tree.
+//!
+//! # Output format
+//!
+//! Each [`Expression::Binary`] is rendered as `(left op right)` with
+//! the operator symbol from [`binary_op_str`]. Each [`Expression::Unary`]
+//! is `op<operand>` (no parentheses — the operator char disambiguates
+//! from a binary application). Literals, identifiers, and calls
+//! follow their natural Rust-like forms.
+//!
+//! # Errors
+//!
+//! Returns [`CodegenError::InvalidStatement`] when a [`Expression::Call`]
+//! has a non-identifier callee — call expressions with a function-valued
+//! expression as the callee are not yet supported.
 
 use crate::CodegenError;
 use xin_ast::{BinaryOp, Expression, Literal, UnaryOp};
 
 /// Generate code for an expression.
+///
+/// Recursively walks the tree. The traversal order is left-to-right,
+/// depth-first; the binary form is rendered as `(left op right)`.
 pub fn generate_expression(expr: &Expression) -> Result<String, CodegenError> {
     match expr {
         Expression::Literal(lit) => generate_literal(lit),

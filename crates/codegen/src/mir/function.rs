@@ -1,28 +1,55 @@
-//! MIR function definition.
+//! MIR function representation.
+//!
+//! The mid-level IR organizes every function as a linear (for now) list
+//! of [`BasicBlock`]s. Each block holds a [`Vec<Instr>`]; control-flow
+//! edges between blocks are not yet represented — branches are emitted
+//! as terminator instructions only when the lowering pass adds them.
+//!
+//! # Virtual registers
+//!
+//! [`MirFunction::next_vreg`] is a monotonic counter. Every
+//! [`VirtualReg`] allocated by [`MirFunction::alloc_vreg`] takes the
+//! current value and bumps it. There is no deallocation: virtual
+//! registers are infinite-arity and only ever needed during the LIR
+//! pass.
+//!
+//! # Lowering
+//!
+//! The HIR → MIR pass is in [`super`] (the parent `mir` module). It
+//! walks a [`crate::hir::HirStmt`] sequence and produces a
+//! [`MirFunction`] per `fn` declaration; top-level expression
+//! statements share a single synthetic "main" function.
 
 use super::types::{Instr, MirBinaryOp, MirValue, VirtualReg};
 use crate::hir::{HirBinaryOp, HirExpr, HirStmt};
 
-/// MIR basic block.
+/// A linear sequence of MIR instructions.
+///
+/// Control-flow is not modeled at the block level; an `if` lowers to a
+/// branch instruction at the end of a block, followed by a fresh block
+/// for the join point.
 #[derive(Debug, Clone)]
 pub struct BasicBlock {
-    /// Instructions in this block.
+    /// Instructions in this block, in execution order.
     pub instrs: Vec<Instr>,
 }
 
-/// MIR function.
+/// A MIR-level function.
+///
+/// Constructed via [`MirFunction::new`]. The first [`BasicBlock`] is
+/// pre-allocated and serves as the entry block.
 #[derive(Debug, Clone)]
 pub struct MirFunction {
     /// Function name.
     pub name: String,
-    /// Basic blocks.
+    /// Basic blocks, in insertion order. `blocks[0]` is the entry block.
     pub blocks: Vec<BasicBlock>,
-    /// Next virtual register ID.
+    /// Next virtual register ID to allocate.
     pub next_vreg: usize,
 }
 
 impl MirFunction {
-    /// Create new MIR function.
+    /// Create a new MIR function with a single empty entry block.
     pub fn new(name: impl Into<String>) -> Self {
         Self { name: name.into(), blocks: vec![BasicBlock { instrs: vec![] }], next_vreg: 0 }
     }
