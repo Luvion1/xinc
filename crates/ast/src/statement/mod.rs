@@ -65,6 +65,30 @@ pub enum BuiltinType {
 /// to compile.
 pub type TypeRef = Type;
 
+use std::fmt;
+
+impl fmt::Display for BuiltinType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            BuiltinType::I32 => write!(f, "i32"),
+            BuiltinType::I64 => write!(f, "i64"),
+            BuiltinType::F32 => write!(f, "f32"),
+            BuiltinType::F64 => write!(f, "f64"),
+            BuiltinType::Bool => write!(f, "bool"),
+            BuiltinType::Str => write!(f, "str"),
+        }
+    }
+}
+
+impl fmt::Display for Type {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Type::Builtin(b) => write!(f, "{b}"),
+            Type::Named(s) => write!(f, "{s}"),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -20,7 +20,7 @@
 
 use super::expr::generate_expression;
 use crate::CodegenError;
-use xin_ast::{Statement, Type, BuiltinType};
+use xin_ast::{Statement, Type};
 
 /// Generate a textual representation of a single statement.
 ///
@@ -83,15 +83,5 @@ fn block(stmts: &[Statement]) -> Result<String, CodegenError> {
 }
 
 fn type_str(t: &Type) -> String {
-    match t {
-        Type::Builtin(b) => match b {
-            BuiltinType::I32 => "i32".into(),
-            BuiltinType::I64 => "i64".into(),
-            BuiltinType::F32 => "f32".into(),
-            BuiltinType::F64 => "f64".into(),
-            BuiltinType::Bool => "bool".into(),
-            BuiltinType::Str => "str".into(),
-        },
-        Type::Named(n) => n.clone(),
-    }
+    t.to_string()
 }
