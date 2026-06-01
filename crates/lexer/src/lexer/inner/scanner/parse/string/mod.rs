@@ -1,6 +1,35 @@
-//! String literal parsing.
+//! String and character literal parsing.
 //!
-//! Parses string literals with escape sequence handling.
+//! Four entry points live here, dispatched by the lead character in
+//! [`crate::lexer::inner::scanner::Lexer::next_token`]:
+//!
+//! - [`parse_string_normal`] — `"..."` with full escape processing.
+//!   This includes `\n`, `\t`, `\r`, `\\`, `\"`, `\0`, and Unicode
+//!   escapes of the form `\u{XXXXXX}` validated through the
+//!   [`crate::token::literal::string::escape::validator`] module.
+//! - [`parse_raw_string`] — `r"..."` with no escape processing. The
+//!   backslash is a literal character; the only terminator is the
+//!   closing `"`.
+//! - [`parse_char_normal`] — `'x'` with the same escape set as
+//!   [`parse_string_normal`]. A character literal must contain exactly
+//!   one character (or one escape sequence) before the closing quote.
+//! - [`parse_char_raw`] — `r'x'` with no escape processing.
+//!
+//! ## Sub-delegation
+//!
+//! Escape sequence validation is handled by the dedicated
+//! [`escape::validator`] module. The parsers in this file only care
+//! about converting recognized escapes into their `String`/`char`
+//! values; rejecting an invalid escape is the validator's job. The
+//! integration happens inside the `\` branch of [`parse_string_normal`]
+//! and [`parse_char_normal`].
+//!
+//! ## Error model
+//!
+//! All four functions return [`crate::error::LexerError`]. The most
+//! common error is [`crate::error::LexerError::UnterminatedString`] /
+//! [`UnterminatedChar`](crate::error::LexerError::UnterminatedChar),
+//! raised when the source runs out before the closing quote.
 
 use crate::lexer::inner::scanner::Scanner;
 
