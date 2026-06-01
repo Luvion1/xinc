@@ -1,7 +1,30 @@
-//! Single-char and simple compound operators.
+//! Single-character and short compound operators.
 //!
-//! Handles `+`, `-`, `*`, `/`, `%`, `&`, `|`, `^`, `~`, `.`, `?`
-//! and their common two- and three-character compound forms.
+//! Each function in this file handles a single leading character and,
+//! where applicable, the second (or third) character that forms a
+//! compound operator. The dispatcher in [`super::mod`] looks at the
+//! scanner's current character and routes to the right per-lead
+//! parser.
+//!
+//! # Coverage
+//!
+//! | Lead | Parses |
+//! |------|--------|
+//! | `+`  | `Plus` / `AddAssign` |
+//! | `-`  | `Minus` / `SubAssign` / `Arrow` |
+//! | `*`  | `Star` / `MulAssign` / `Pow` (`**`) / `DoubleStar` |
+//! | `/`  | `Slash` / `DivAssign` |
+//! | `%`  | `Percent` / `RemAssign` |
+//! | `&`  | `BitAnd` / `AndAssign` (handled in [`super::assign`]) |
+//! | `|`  | `BitOr` / `OrAssign` |
+//! | `^`  | `BitXor` / `XorAssign` |
+//! | `~`  | `BitNot` |
+//! | `.`  | `Dot` / `Range` (`..`) / `RangeExclusive` (`..<`) |
+//! | `?`  | `Question` / `Coalesce` (`??`) / `OptionChain` (`?.`) |
+//!
+//! Compound assignment operators (`+=`, `-=`, etc.) are split between
+//! this file and [`super::assign`]: short forms live here, longer
+//! multi-character forms (like `**=`) are in the assign module.
 
 use crate::token::TokenKind;
 use crate::lexer::inner::scanner::Scanner;

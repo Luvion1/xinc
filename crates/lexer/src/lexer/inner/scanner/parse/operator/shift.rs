@@ -1,7 +1,28 @@
-//! Shift and comparison operators.
+//! Comparison and shift operators.
 //!
-//! Handles `<`, `<=`, `<<`, `<<=`, `>`, `>=`, `>>`, `>>=` shared
-//! logic for both comparison and bit-shift operations.
+//! All operators in this file share a leading `<` or `>`. The two
+//! public functions ([`parse_lt`] and [`parse_gt`]) consume the lead,
+//! then peek at the next character(s) to decide between a comparison,
+//! a shift, or a compound assignment.
+//!
+//! # State machine
+//!
+//! ```text
+//! '<'  ─► '=' ─► Lte
+//!       └► '<' ─► '=' ─► ShlAssign
+//!             └►     ─► Shl
+//!       └►        ─► Lt
+//!
+//! '>'  ─► '=' ─► Gte
+//!       └► '>' ─► '=' ─► ShrAssign
+//!             └►     ─► Shr
+//!       └►        ─► Gt
+//! ```
+//!
+//! Equality operators (`==`, `!=`) live in [`super::assign`] along with
+//! the other compound-assignment forms; this file deliberately keeps
+//! just the `<`/`>` family to keep the precedence of the file structure
+//! mirroring the precedence of the language operators.
 
 use crate::token::TokenKind;
 use crate::lexer::inner::scanner::Scanner;
