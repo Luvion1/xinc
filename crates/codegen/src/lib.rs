@@ -17,9 +17,45 @@
     clippy::uninlined_format_args
 )]
 
-//! Code generation for Xin.
+//! Xin code generation.
 //!
-//! Compiles AST to machine code via HIR->MIR->LIR->LLVM.
+//! Lowers a semantically-checked AST into a textual representation. The
+//! crate exposes a staged pipeline:
+//!
+//! ```text
+//! AST → [lower_to_hir] → HIR → [lower_to_mir] → MIR → [lower_to_lir] → LIR
+//! ```
+//!
+//! At the top level, [`generate`] takes a slice of statements and returns
+//! the generated source as a `String`. Currently only `let` bindings and
+//! expression statements are emitted; everything else surfaces as
+//! [`CodegenError::InvalidStatement`].
+//!
+//! # Architecture
+//!
+//! - [`hir`] — high-level IR, close to the AST. Each `HirStmt` / `HirExpr`
+//!   corresponds to a syntactic form. Lowering is mostly a structural
+//!   recursion.
+//! - [`mir`] — mid-level IR. Functions become [`MirFunction`]s with explicit
+//!   locals and a small instruction set. Control flow is not yet modeled.
+//! - [`lir`] — low-level IR. [`LirFunction`] is the planned target for an
+//!   LLVM backend (not yet wired up).
+//! - [`generator`] — the text-level emitter. Walks an AST and produces
+//!   parenthesized infix code, e.g. `(1 + (2 * 3))`.
+//!
+//! # Errors
+//!
+//! All public functions return [`Result<_, CodegenError>`]. The single
+//! variant [`CodegenError::InvalidStatement`] signals a statement kind
+//! that has no lowering rule yet (e.g. `if`, `while`, `fn` bodies).
+//!
+//! # Example
+//!
+//! ```ignore
+//! use xin_codegen::generate;
+//! let stmts = /* from xin_parser::parse_statement */;
+//! let code = generate(&stmts).unwrap();
+//! ```
 
 mod codegen_error;
 mod generator;

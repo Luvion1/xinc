@@ -57,11 +57,11 @@ fn main() {
         match xin_driver::tokenize(&source) {
             Ok(tokens) => {
                 info!("Generated {} tokens", tokens.len());
-                if let Some(output) = args.output {
-                    if let Err(e) = std::fs::write(&output, format!("{:#?}", tokens)) {
-                        error!("Failed to write output file: {}", e);
-                        std::process::exit(1);
-                    }
+                if let Some(output) = args.output
+                    && let Err(e) = std::fs::write(&output, format!("{:#?}", tokens))
+                {
+                    error!("Failed to write output file: {}", e);
+                    std::process::exit(1);
                 }
             }
             Err(e) => {
@@ -83,13 +83,15 @@ fn main() {
         }
     };
 
+if args.parse
+    && let Some(ref output) = args.output
+    && let Err(e) = std::fs::write(output, format!("{:#?}", stmts))
+{
+        error!("Failed to write output file: {}", e);
+        std::process::exit(1);
+    }
+
     if args.parse {
-        if let Some(output) = args.output {
-            if let Err(e) = std::fs::write(&output, format!("{:#?}", stmts)) {
-                error!("Failed to write output file: {}", e);
-                std::process::exit(1);
-            }
-        }
         return;
     }
 

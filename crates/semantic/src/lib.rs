@@ -12,9 +12,49 @@
     clippy::collapsible_if
 )]
 
-//! Semantic analysis module.
+//! Xin semantic analysis.
 //!
-//! Performs type checking and other analyses.
+//! Performs name resolution and type checking over an AST produced by
+//! [`xin_parser`](https://docs.rs/xin-parser). The output is suitable for
+//! handing to [`xin_codegen`](https://docs.rs/xin-codegen).
+//!
+//! # Main types
+//!
+//! - [`Analyzer`] — the workhorse. Holds a [`SymbolTable`] and walks a
+//!   stream of statements, validating each in turn. Built via
+//!   [`Analyzer::new`].
+//! - [`SymbolTable`] — a flat name → [`Symbol`] map. The analyzer inserts
+//!   entries for every `let` and `fn` declaration, and rejects assignments
+//!   to unknown names.
+//! - [`Symbol`] — currently a `{ ty, mutable }` pair. The `ty` is stored
+//!   as a `String` (the [`Debug`] form of the [`xin_ast::Type`]) rather
+//!   than the [`xin_ast::Type`] itself; this keeps semantic independent of
+//!   the AST's type system evolution.
+//! - [`SemanticError`] — analysis failures: undefined variables, type
+//!   mismatches, non-integer operands to bitwise/shift operators, etc.
+//!
+//! # Pipeline position
+//!
+//! ```text
+//! source → [xin-lexer] → tokens → [xin-parser] → AST → [xin-semantic] → checked AST → [xin-codegen]
+//! ```
+//!
+//! # Example
+//!
+//! ```ignore
+//! use xin_semantic::Analyzer;
+//! let mut analyzer = Analyzer::new();
+//! // for each statement: analyzer.analyze(stmt)?;
+//! ```
+//!
+//! # Limitations
+//!
+//! - Single-scope: the analyzer does not yet implement block scoping.
+//!   A `let` inside a block is visible to the whole function.
+//! - No control-flow analysis: a `let` followed by an assignment to the
+//!   same name in a different branch is not flagged.
+//! - Type inference is shallow: bitwise/shift operands are required to be
+//!   integer literals or identifiers; no actual numeric type checking.
 
 mod analysis;
 mod error;
