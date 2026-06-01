@@ -1,4 +1,20 @@
-//! If statement parser.
+//! `if`/`else` statement parser.
+//!
+//! Parses the form:
+//!
+//! ```text
+//! if <expression> { <statements> } [else { <statements> }]?
+//! ```
+//!
+//! The condition is parsed as a full expression. The `then` and `else`
+//! branches are recursive statement lists (i.e. any statement kind is
+//! allowed inside). The `else` branch is currently restricted to a block;
+//! chained `else if` works only because the inner `Block` can contain
+//! another `Statement::If` — a future change can lift this if a
+//! `Statement::ElseIf` variant is introduced.
+//!
+//! The caller must have verified that the token at `idx` is the `if`
+//! keyword before calling.
 
 use super::super::super::expression::ParserError;
 use super::super::super::expression::parse_expression_from_tokens;
@@ -6,7 +22,15 @@ use crate::statement::parse_statements_from_tokens;
 use xin_ast::Statement;
 use xin_lexer::TokenKind;
 
-/// Parse if-else statement.
+/// Parse an `if` statement and push the resulting [`Statement::If`] onto
+/// `statements`.
+///
+/// # Errors
+///
+/// - [`ParserError::ExpectedLBrace`] if the `then` body isn't opened with
+///   `{`, or if an `else` is present but the `else` body isn't a block.
+/// - Any error propagated from [`parse_expression_from_tokens`] (the
+///   condition) or [`parse_statements_from_tokens`] (the bodies).
 pub fn parse_if_statement(
     tokens: &[xin_lexer::Token],
     mut idx: usize,
