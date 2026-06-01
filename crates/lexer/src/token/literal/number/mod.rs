@@ -1,9 +1,34 @@
 //! Numeric literal tokens.
-//! Handles integer and floating-point literals.
+//!
+//! Defines the type-level representation of a Xin number literal. The
+//! parser side ([`crate::lexer::inner::scanner::parse::number`]) takes
+//! raw characters and produces a [`NumberLiteral`].
+//!
+//! # Forms supported
+//!
+//! | Form | Example | Stored as |
+//! |------|---------|-----------|
+//! | Decimal integer | `42`, `1_000` | [`IntegerLiteral`] with `radix = 10` |
+//! | Hex integer | `0x2A`, `0xFF_u32` | [`IntegerLiteral`] with `radix = 16` |
+//! | Octal integer | `0o52` | [`IntegerLiteral`] with `radix = 8` |
+//! | Binary integer | `0b1010` | [`IntegerLiteral`] with `radix = 2` |
+//! | Float | `3.14`, `1.0e10` | [`FloatLiteral`] with `has_decimal = true` |
+//!
+//! Underscores (`_`) are allowed between digits as visual separators and
+//! recorded via the `has_underscore` flag for diagnostics.
+//!
+//! # Why stringly typed
+//!
+//! The value is kept as a `String` rather than `u64`/`f64` so the lexer
+//! does not silently lose precision on large literals or perform
+//! premature type inference. Semantic analysis is the right place to
+//! pick a concrete numeric type and check the range.
 
-/// Radix support.
+/// Radix support for integer literals.
 ///
-/// Binary, octal, decimal, hexadecimal number parsing.
+/// See the per-radix modules for parse rules. The dispatcher at
+/// [`crate::lexer::inner::scanner::parse::number::parse_number`] picks
+/// the right module based on the leading prefix.
 pub mod radix;
 
 /// A numeric literal value.
@@ -15,7 +40,11 @@ pub enum NumberLiteral {
     Float(FloatLiteral),
 }
 
-/// Integer literal with radix.
+/// Integer literal with explicit radix.
+///
+/// `radix` is one of `2`, `8`, `10`, or `16`. `value` is the digit
+/// sequence **without** the `0b`/`0o`/`0x` prefix and **without**
+/// underscore separators (those are stripped by the parser).
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct IntegerLiteral {
     pub value: String,
@@ -24,6 +53,11 @@ pub struct IntegerLiteral {
 }
 
 /// Float literal.
+///
+/// `value` includes the digits, decimal point, and exponent suffix
+/// (e.g. `"1.5e10"`). `has_decimal` is `true` for any literal that
+/// contains a `.` or an `e`/`E` exponent; integers that fit in 64 bits
+/// are kept as [`IntegerLiteral`] instead.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct FloatLiteral {
     pub value: String,

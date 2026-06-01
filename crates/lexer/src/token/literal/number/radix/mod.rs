@@ -1,5 +1,27 @@
 //! Radix (base) handling for numeric literals.
-//! Supports binary, octal, decimal, and hexadecimal.
+//!
+//! The dispatcher at [`crate::lexer::inner::scanner::parse::number::parse_number`]
+//! routes a leading character to the right per-radix parser:
+//!
+//! - `0b` / `0B` → [`binary`]
+//! - `0o` / `0O` → [`octal`]
+//! - `0x` / `0X` → [`hex`]
+//! - any other digit → [`decimal`]
+//!
+//! Every per-radix module exposes a function of the shape
+//! `parse_<radix>(scanner, prefix_consumed: bool) -> Result<IntegerLiteral,
+//! LexerError>`. The `prefix_consumed` flag tells the parser whether
+//! the caller has already advanced past the `0b`/`0o`/`0x` prefix
+//! (the dispatcher does this so it can fall back to a plain decimal
+//! `0` on a bare `0`).
+//!
+//! # Underscore policy
+//!
+//! All four radix parsers accept `_` between digits and **between
+//! the prefix and the first digit** for hex/octal/binary. Multiple
+//! underscores in a row are accepted. The presence of any underscore
+//! is recorded via `IntegerLiteral::has_underscore`; the digits
+//! themselves are stored stripped.
 
 /// Binary (base-2) parser.
 pub mod binary;
@@ -16,6 +38,10 @@ pub mod hex;
 // Submodules are in the same module, accessible directly
 
 /// Numeric base types.
+///
+/// Tag enum that the dispatcher uses to communicate the chosen base
+/// back to callers. The active parser does not have to return this —
+/// the dispatch path is fixed by prefix.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Radix {
     Binary,
